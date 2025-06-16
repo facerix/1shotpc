@@ -208,7 +208,8 @@ table {
 
 .attacks,
 .features,
-.equipment {
+.equipment,
+.spells {
   border: 1px solid black;
 
   table {
@@ -235,15 +236,26 @@ table {
 }
 .features {
   columns: 2;
+  flex: 1;
 }
 .equipment {
   columns: 5;
+}
+.spells {
+  flex-basis: 25%;
+}
+#features-and-spells {
+  gap: 0.5em;
 }
 
 /* responsive styles */
 @media (max-width: 750px) {
   .features {
     columns: 1;
+    flex: 1 1 auto;
+  }
+  .spells {
+    flex: 1 1 auto;
   }
   .equipment {
     columns: 2;
@@ -258,7 +270,16 @@ table {
   }
 }
 
-@media (min-width: 751px) and (max-width: 1200px) {
+@media (min-width: 751px) and (max-width: 900px) {
+  .features {
+    flex: 1 1 auto;
+  }
+  .spells {
+    flex: 1 1 auto;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1200px) {
   .equipment {
     columns: 4;
   }

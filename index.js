@@ -1565,21 +1565,26 @@ const CharacterSheet = (PC) => {
       </tbody>
     </table>
   </div>
-  <div class="features">
-    <h4>Special abilities, class features, &amp; spells</h4>
-    <ul>
-      ${specialSkills.map(skill => `<li>${skill} (${ABILITY_MOD_FOR_SKILL[skill]}, ${statModStr(getSkillBonus(skill, PC.bonuses, PC.proficiencies))} total)</li>`)}
-      ${PC.features.map(feature => {
-        if (feature.desc) {
-          return `<details><summary>${feature.name}:</summary><div>${feature.desc}</div></details>`;
-        } 
-        return `<li>${feature}</li>`;
-      })}
-    </ul>
-    ${PC.spells?.length > 0 && jsx`
-      <ul><strong>Spells:</strong>
-        ${PC.spells.map(spell => `<li>${spell}</li>`)}
+  <div class="flex" id="features-and-spells">
+    <div class="features">
+      <h4>Special abilities &amp; class features</h4>
+      <ul>
+        ${specialSkills.map(skill => `<li>${skill} (${ABILITY_MOD_FOR_SKILL[skill]}, ${statModStr(getSkillBonus(skill, PC.bonuses, PC.proficiencies))} total)</li>`)}
+        ${PC.features.map(feature => {
+          if (feature.desc) {
+            return `<details><summary>${feature.name}:</summary><div>${feature.desc}</div></details>`;
+          } 
+          return `<li>${feature}</li>`;
+        })}
       </ul>
+    </div>
+    ${PC.spells?.length > 0 && jsx`
+      <div class="spells">
+        <h4>Spells</h4>
+        <ul>
+          ${PC.spells.map(spell => `<li>${spell}</li>`)}
+        </ul>
+      </div>
     `}
   </div>
   <div class="equipment">

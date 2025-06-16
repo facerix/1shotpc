@@ -74,19 +74,19 @@ const BASE_SPECIES = [
 const SMALL_SPECIES = ["Gnome", "Halfling"];
 
 const ORIGIN_FEATS = {
-  "Alert": "Add your Proficiency Bonus when you roll Initiative. Can also swap your Initiative with a willing ally in the same combat.",
+  "Alert": "Add your Proficiency Bonus (+2) when you roll Initiative. Can also swap your Initiative with a willing ally in the same combat.",
   "Crafter": "Gain proficiency with three different sets of Artisan’s Tools. Gain a 20 percent discount on nonmagical items. Can craft an item from a Fast Crafting table, which lasts until you finish another Long Rest.",
-  "Healer": "When you Utilize a Healer’s Kit as an action, a creature can expend one of its Hit Point Dice to heal. Your Proficiency Bonus is added to the roll. When you roll to determine Hit Points when healing with this feature or a spell, you can reroll the dice if it rolls a 1. You must use the new roll.",
-  "Lucky": "After finishing a Long Rest, you have a number of Luck Points equal to your Proficiency Bonus. You can expend one when you make a D20 Test to give yourself Advantage. You can also expend one to impose Disadvantage when a creature rolls a d20 to make an attack roll against you.",
+  "Healer": "When you Utilize a Healer’s Kit as an action, a creature can expend one of its Hit Point Dice to heal, adding your Proficiency Bonus (+2) to the roll. When you roll to determine Hit Points when healing with this feature or a spell, you can reroll the dice if it rolls a 1. You must use the new roll.",
+  "Lucky": "You have 2 Luck Points per day. You can expend one when you make a D20 Test to give yourself Advantage. You can also expend one to impose Disadvantage when a creature rolls a d20 to make an attack roll against you.",
   "Magic Initiate (Cleric)": "You gain two cantrips and one level 1 spell from the Cleric spell list. You can cast these spells once per Long Rest without expending a spell slot, and can cast them again using spell slots. Wisdom is your spellcasting ability for your Cleric spells.",
   "Magic Initiate (Druid)": "You gain two cantrips and one level 1 spell from the Druid spell list. You can cast these spells once per Long Rest without expending a spell slot, and can cast them again using spell slots. Wisdom is your spellcasting ability for your Druid spells.",
   "Magic Initiate (Wizard)": "You gain two cantrips and one level 1 spell from the Wizard spell list. You can cast these spells once per Long Rest without expending a spell slot, and can cast them again using spell slots. Intelligence is your spellcasting ability for your Wizard spells.",
-  "Musician": "You gain proficiency with three musical instruments of your choice. At the end of a Short or Long Rest, you may play the instrument and grant Heroic Inspiration to a number of allies equal to your Proficiency Bonus.",
+  "Musician": "You gain proficiency with three musical instruments of your choice. At the end of a Short or Long Rest, you may play the instrument and grant Heroic Inspiration to 2 allies.",
   "Savage Attacker": "Once per turn, when you hit a target with a weapon attack, you can roll the weapon damage dice twice and use either roll against the target.",
-  "Skilled": "You gain proficiency in any combination of three skills or tools of your choice. You can take this feat more than once.",
+  "Skilled": "You gain proficiency in any combination of three additional skills or tools.",
   "Tavern Brawler": "When you hit with an Unarmed Strike and deal damage, you can deal 1d4 + your Strength modifier. If the damage dice for your Unarmed Strikes roll is a 1, you can reroll it and must use the new roll. You have proficiency with improvised weapons. Once per turn, when you hit a creature with an Unarmed Strike as part of the Attack action, in addition to dealing damage, you can push the target 5 feet away from you.",
-  "Tough": "Your Hit Point maximum increases by twice your character level.",
-}
+  "Tough": "Your Hit Point maximum increases by 2.",
+};
 
 const ARTISANS_TOOLS = [
   "Alchemist's Supplies",
@@ -111,7 +111,7 @@ const ARTISANS_TOOLS = [
   "Thieves' Tools",
   "Weaver's Tools",
   "Woodcarver's Tools",
-]
+];
 
 const LIGHT_ARMOR = {
   "Padded Armor": 11,
@@ -566,7 +566,7 @@ const MODS_BY_CLASS = {
       "Thunderwave (lvl 1)",
     ]
   },
-}
+};
 
 const ATTACKS_BY_CLASS = {
   Barbarian: ["Greataxe", "Handaxe", "Rage"],
@@ -783,7 +783,6 @@ const ATTACKS = {
     damage: "2d8",
     damageType: "Thunder"
   },
-
 };
 
 const SPELLSAVE_BY_CLASS = {
@@ -1029,8 +1028,239 @@ const getModsForBackground = (backgroundName) => {
     }
   }
   return mods;
-}
+};
 
+const DRAGON_TYPES = [
+  "Black",
+  "Blue",
+  "Brass",
+  "Bronze",
+  "Copper",
+  "Gold",
+  "Green",
+  "Red",
+  "Silver",
+  "White"
+];
+
+const DRAGON_BREATH_BY_TYPE = {
+  "Black": "Acid",
+  "Blue": "Lightning",
+  "Brass": "Fire",
+  "Bronze": "Lightning",
+  "Copper": "Acid",
+  "Gold": "Fire",
+  "Green": "Poison",
+  "Red": "Fire",
+  "Silver": "Cold",
+  "White": "Cold"
+};
+
+const GIANT_LINEAGES = ["Cloud", "Fire", "Frost", "Hill", "Stone", "Storm"];
+const GIANT_BOON_BY_LINEAGE = {
+  "Cloud": `Cloud’s Jaunt. As a Bonus Action, you magically teleport up to 30 feet to an unoccupied space you can see.`,
+  "Fire": `Fire’s Burn. When you hit a target with an attack roll and deal damage to it, you can also deal 1d10 Fire damage to that target.`,
+  "Frost": `Frost’s Chill. When you hit a target with an attack roll and deal damage to it, you can also deal 1d6 Cold damage to that target and reduce its Speed by 10 feet until the start of your next turn.`,
+  "Hill": `Hill’s Tumble. When you hit a Large or smaller creature with an attack roll and deal damage to it, you can give that target the Prone condition.`,
+  "Stone": `Stone’s Endurance. When you take damage, you can take a Reaction to roll 1d12. Add your Constitution modifier to the number rolled and reduce the damage by that total.`,
+  "Storm": `Storm’s Thunder. When you take damage from a creature within 60 feet of you, you can take a Reaction to deal 1d8 Thunder damage to that creature.`
+};
+
+const getSpeciesMods = (species, bonuses) => {
+  let speed = 30;
+  let size = "Medium";
+  const spells = [];
+  const features = [];
+  const attacks = [];
+  const skills = [];
+  let feat = null;
+
+  switch (species) {
+    case "Aasimar":
+      // size: "Medium"
+      // speed: 30
+      features.push(...[
+        "Celestial Resistance. You have Resistance to Necrotic damage and Radiant damage.",
+        "Darkvision. You have Darkvision with a range of 60 feet.",
+        "Healing Hands. As a Magic action, you touch a creature and roll 2d4. The creature regains a number of Hit Points equal to the total rolled. Once you use this trait, you can’t use it again until you finish a Long Rest.",
+        "Light Bearer. You know the Light cantrip. Charisma is your spellcasting ability for it.",
+      ]);
+      spells.push("Light (lvl 0)");
+      break;
+
+    case "Dragonborn":
+      // size: "Medium"
+      // speed: 30
+      const dragonType = oneOf(DRAGON_TYPES);
+      const damageType = DRAGON_BREATH_BY_TYPE[dragonType];
+      features.push(...[
+        `Draconic Ancestry. Your lineage stems from a ${dragonType} dragon progenitor.`,
+        `Breath Weapon. When you take the Attack action on your turn, you can replace one of your attacks with an exhalation of magical energy in either a 15-foot Cone or a 30-foot Line that is 5 feet wide (choose the shape each time). Each creature in that area must make a Dexterity saving throw (DC 8 plus your Constitution modifier and Proficiency Bonus). On a failed save, a creature takes 1d10 damage of the type determined by your Draconic Ancestry trait. On a successful save, a creature takes half as much damage. You can use this Breath Weapon 2 times per day.`,
+        `Damage Resistance. You have Resistance to ${damageType} damage.`,
+        `Darkvision. You have Darkvision with a range of 60 feet.`
+      ]);
+      attacks.push({
+        name: "Breath Weapon",
+        save: "CON",
+        saveDC: 10 + bonuses.CON,
+        damage: "1d10",
+        damageType: "Thunder"    
+      })
+      break;
+
+    case "Dwarf":
+      features.push(...[
+        "Darkvision. You have Darkvision with a range of 120 feet.",
+        "Dwarven Resilience. You have Resistance to Poison damage. You also have Advantage on saving throws you make to avoid or end the Poisoned condition.",
+        "Dwarven Toughness. Your Hit Point maximum increases by 1",
+        `Stonecunning. As a Bonus Action, you gain Tremorsense with a range of 60 feet for 10 minutes. You must be on a stone surface or touching a stone surface to use this Tremorsense. The stone can be natural or worked. You can use this Bonus Action a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.`
+      ]);
+      break;
+
+    case "Elf":
+      const ancestry = oneOf(["Drow", "High Elf", "Wood Elf"]);
+      let ancestryAbilities = "";
+      let darkvisionRange = 60;
+      if (ancestry === "Drow") {
+        ancestryAbilities = "The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip.";
+        darkvisionRange = 120;
+        spells.push("Dancing Lights (lvl 0)");
+
+      } else if (ancestry === "High Elf") {
+        ancestryAbilities = "You know the Prestidigitation cantrip.";
+        spells.push("Prestidigitation (lvl 0)");
+
+      } else {
+        // Wood Elf
+        ancestryAbilities = "Your Speed increases to 35 feet. You also know the Druidcraft cantrip.";
+        speed = 35;
+        spells.push("Druidcraft (lvl 0)");
+      }
+      const keenSense = oneOf(["Insight", "Perception", "Survival"]);
+      skills.push(keenSense);
+      features.push(...[
+        `Darkvision. You have Darkvision with a range of ${darkvisionRange} feet.`,
+        `Elven Lineage. You are part of a ${ancestry} lineage that grants you supernatural abilities. ${ancestryAbilities}`,
+        "Fey Ancestry. You have Advantage on saving throws you make to avoid or end the Charmed condition.",
+        `Keen Senses. You have proficiency in the ${keenSense} skill.`,
+        `Trance. You don’t need to sleep, and magic can’t put you to sleep. You can finish a Long Rest in 4 hours if you spend those hours in a trancelike meditation, during which you retain consciousness.`
+      ]);
+      break;
+
+    case "Gnome":
+      const gnomishLineage = oneOf(["Forest Gnome", "Rock Gnome"]);
+      size = "Small";
+      features.push(...[
+        "Darkvision. You have Darkvision with a range of 60 feet.",
+        "Gnomish Cunning. You have Advantage on Intelligence, Wisdom, and Charisma saving throws."
+      ]);
+      if (gnomishLineage === "Forest Gnome") {
+        features.push(`Gnomish Lineage: Forest Gnome. You know the Minor Illusion cantrip. You also always have the Speak with Animals spell prepared. You can cast it without a spell slot 2 times per day.`);
+        spells.push(...[
+          "Minor Illusion (lvl 0)",
+          "Speak with Animals (2 / day)"
+        ]);
+      } else {
+        spells.push(...[
+          "Mending (lvl 0)",
+          "Prestidigitation (lvl 0)"
+        ]);
+        features.push(`Gnomish Lineage: Rock Gnome. You know the Mending and Prestidigitation cantrips. In addition, you can spend 10 minutes casting Prestidigitation to create a Tiny clockwork device (AC 5, 1 HP), such as a toy, fire starter, or music box. When you create the device, you determine its function by choosing one effect from Prestidigitation; the device produces that effect whenever you or another creature takes a Bonus Action to activate it with a touch. If the chosen effect has options within it, you choose one of those options for the device when you create it. For example, if you choose the spell’s ignite-extinguish effect, you determine whether the device ignites or extinguishes fire; the device doesn’t do both. You can have three such devices in existence at a time, and each falls apart 8 hours after its creation or when you dismantle it with a touch as a Utilize action.`);
+      }
+      break;
+
+    case "Goliath":
+      speed = 35;
+      const giantAncestry = oneOf(GIANT_LINEAGES);
+      features.push(...[
+        `Giant Ancestry. You are descended from ${giantAncestry} Giants. You have a supernatural boon from your ancestry, as follows; you can use it 2 times per day:
+      <p>${GIANT_BOON_BY_LINEAGE[giantAncestry]}</p>`,
+        "Powerful Build. You have Advantage on any ability check you make to end the Grappled condition. You also count as one size larger when determining your carrying capacity."
+      ])
+      break;
+
+    case "Halfling":
+      size = "Small";
+      features.push(...[
+        "Brave. You have Advantage on saving throws you make to avoid or end the Frightened condition.",
+        "Halfling Nimbleness. You can move through the space of any creature that is a size larger than you, but you can’t stop in the same space.",        
+        "Luck. When you roll a 1 on the d20 of a D20 Test, you can reroll the die, and you must use the new roll.",        
+        "Naturally Stealthy. You can take the Hide action even when you are obscured only by a creature that is at least one size larger than you."
+      ]);
+      break;
+
+    case "Human":
+      const talent = oneOf(CORE_SKILLS);
+      skills.push(talent);
+      feat = oneOf(Object.keys(ORIGIN_FEATS));
+      features.push(...[
+        "Resourceful. You gain Heroic Inspiration whenever you finish a Long Rest.",
+        `Skillful. You have proficiency in ${talent}.`,
+        `Versatile. You have the ${feat} Origin feat.
+        <p>${ORIGIN_FEATS[feat]}</p>`,
+      ]);
+      break;
+
+    case "Orc":
+      features.push(...[
+        "Adrenaline Rush. You can take the Dash action as a Bonus Action. When you do so, you gain 2 Temporary Hit Points. You can use this trait 2 times per day.",
+        "Darkvision. You have Darkvision with a range of 120 feet.",        
+        `Relentless Endurance. When you are reduced to 0 Hit Points but not killed outright, you can drop to 1 Hit Point instead. Once you use this trait, you can’t do so again until you finish a Long Rest.`
+      ]);
+      break;
+
+    case "Tiefling":
+      const legacy = oneOf(["Abyssal", "Chthonic", "Infernal"]);
+      const spellAttr = oneOf(["INT", "WIS", "CHA"]);
+      features.push("Darkvision. You have Darkvision with a range of 60 feet.");
+      if (legacy === "Abyssal") {
+        features.push(`Fiendish Legacy. You are the recipient of an Abyssal legacy that grants you supernatural abilities.
+          <p>You have Resistance to Poison damage. You also know the Poison Spray cantrip.</p>`);
+        spells.push("Poison Spray (lvl 0)");
+        attacks.push({
+          name: "Poison Spray",
+          attr: spellAttr,
+          damage: "1d12",
+          damageType: "Poison"
+        });
+
+      } else if (legacy === "Chthonic") {
+        features.push(`Fiendish Legacy. You are the recipient of a Chthonic legacy that grants you supernatural abilities.
+          <p>You have Resistance to Necrotic damage. You also know the Chill Touch cantrip.</p>`);
+        spells.push("Chill Touch (lvl 0)");
+        attacks.push({
+          name: "Chill Touch",
+          attr: spellAttr,
+          damage: "1d10",
+          damageType: "Necrotic"
+        });
+
+      } else {
+        // Infernal
+        features.push(`Fiendish Legacy. You are the recipient of an Infernal legacy that grants you supernatural abilities.
+          <p>You have Resistance to Fire damage. You also know the Fire Bolt cantrip.</p>`);
+        spells.push("Fire Bolt (lvl 0)");
+        attacks.push({
+          name: "Fire Bolt",
+          attr: spellAttr,
+          damage: "1d10",
+          damageType: "Fire"
+        });
+      }
+      features.push("Otherworldly Presence. You know the Thaumaturgy cantrip.");
+      break;
+  }
+
+  return {
+    speed,
+    size,
+    features,
+    spells,
+    attacks,
+    skills,
+    feat,
+  };
+};
 
 const roll = (dieMax, modifier = 0) => {
   return Math.floor(Math.random() * dieMax) + 1 + modifier
@@ -1038,7 +1268,7 @@ const roll = (dieMax, modifier = 0) => {
 
 const sum = (numberArray) => {
   return (numberArray ?? []).reduce((acc, val) => acc + val, 0);
-}
+};
 
 const rollStat = () => {
   const rolls = [
@@ -1178,7 +1408,7 @@ const getSkillBonus = (skillName, bonuses, proficiencies, hasExpertise = false) 
     return bonuses[attr] + bonus;
   }
   return 0;
-}
+};
 
 const AttrGrid = (PC) => {
   const { attrs, bonuses, skills: rawSkills, className, proficiencies } = PC;
@@ -1253,7 +1483,7 @@ const AttrGrid = (PC) => {
       <span class="ability">${statModStr(getSkillBonus("Persuasion", bonuses, proficiencies))} Persuasion</span>
     </div>
   </div>`;
-}
+};
 
 const CharacterSheet = (PC) => {
   const specialSkills = [];
@@ -1311,7 +1541,8 @@ const CharacterSheet = (PC) => {
           if (atk.desc) {
             entry = jsx`<tr><td colspan="3">${atk.name}: ${atk.desc}</td></tr>`;
           } else if (atk.save) {
-            let save = atk.save === "None" ? "None" : `${atk.save} save (DC ${PC.bonuses.spellSave})`;
+            let DC = atk.saveDC ?? PC.bonuses.spellSave;
+            let save = atk.save === "None" ? "None" : `${atk.save} save (DC ${DC})`;
             entry = jsx`<tr>
               <td>${atk.name}</td>
               <td>${save}</td>
@@ -1357,7 +1588,7 @@ const CharacterSheet = (PC) => {
       ${PC.equipment.map(eq => `<li>${eq}</li>`)}
     </ul>
   </div>`;
-}
+};
 
 const PC_by_4d6 = () => {
   const attrs = {
@@ -1375,7 +1606,7 @@ const PC_by_4d6 = () => {
     attrs,
     className
   };
-}
+};
 
 const PC_by_StatArray = (classOverride) => {
   const className = classOverride || oneOf(BASE_CLASSES);
@@ -1388,7 +1619,7 @@ const PC_by_StatArray = (classOverride) => {
     attrs,
     className
   };
-}
+};
 
 const newPC = ({ classOverride = "", oldSchool = false }) => {
   const species = oneOf(BASE_SPECIES);
@@ -1411,6 +1642,7 @@ const newPC = ({ classOverride = "", oldSchool = false }) => {
   }
   const origin = oneOf(BACKGROUNDS_BY_CLASS[className]);
 
+  const speciesMods = getSpeciesMods(species, bonuses); // spells / features / attacks / skills
   const originMods = getModsForBackground(origin);
   const classMods = MODS_BY_CLASS[className];
 
@@ -1441,7 +1673,7 @@ const newPC = ({ classOverride = "", oldSchool = false }) => {
 
   let HP = getHP(className, bonuses.CON);
   let initiative = bonuses.DEX;
-  const speed = 30;
+  const speed = speciesMods.speed;
   const size = SMALL_SPECIES.includes(species) ? "Small" : "Medium";
   const attacks = ATTACKS_BY_CLASS[className].map(name => {
     return {
@@ -1450,74 +1682,91 @@ const newPC = ({ classOverride = "", oldSchool = false }) => {
     };
   });
 
+  attacks.push(...speciesMods.attacks);
+
   let proficiencies = new Set([
+    ...speciesMods.skills,
     ...classMods.skills,
     ...originMods.skills,
     originMods.tool,
   ]);
   const spells = classMods.spells ? [...classMods.spells] : [];
+  spells.push(...speciesMods.spells);
 
-  // apply any modifications from the origin feat
-  switch (originMods.feat) {
-    case "Alert":
-      // "Add your Proficiency Bonus when you roll Initiative.
-      initiative += 2;
-      break;
-    case "Crafter":
-      // "Gain proficiency with three different sets of Artisan’s Tools.
-      pickNMore(ARTISANS_TOOLS, 3, proficiencies);
-      break;
-    case "Magic Initiate (Cleric)":
-      // "You gain two cantrips and one level 1 spell from the Cleric spell list.",
-      bonuses.spellSave = 10 + bonuses.WIS;
-      spells.unshift(...[
-        "Mending (lvl 0)",
-        "Resistance (lvl 0)",
-      ]);
-      spells.push("Detect Magic (lvl 1)");
-      break;
-    case "Magic Initiate (Druid)":
-      // "You gain two cantrips and one level 1 spell from the Druid spell list.",
-      bonuses.spellSave = 10 + bonuses.WIS;
-      spells.unshift(...[
-        "Mending (lvl 0)",
-        "Message (lvl 0)",
-      ])
-      spells.push("Longstrider (lvl 1)");
-      break;
-    case "Magic Initiate (Wizard)":
-      // "You gain two cantrips and one level 1 spell from the Wizard spell list.",
-      bonuses.spellSave = 10 + bonuses.INT;
-      // todo: pick extra wizard spells
-      // spells.unshift(...[
-      //   "--- (lvl 0)",
-      //   "--- (lvl 0)",
-      // ])
-      // spells.push("--- (lvl 1)");
-      break;
-    case "Musician":
-      // "You gain proficiency with three musical instruments of your choice."
-      pickNMore(MUSICAL_INSTRUMENTS, 3, proficiencies);
-      break;
-    case "Skilled":
-      // "You gain proficiency in any combination of three skills or tools of your choice.",
-      // TODO
-      break;
-    case "Tavern Brawler":
-      // (only apply if class is not Monk, since Monk's unarmed strike is better)
-      if (className !== "Monk") {
+  // apply any modifications from the origin feat(s)
+  [originMods.feat, speciesMods.feat].forEach(feat => {
+    switch (feat) {
+      case "Alert":
+        // "Add your Proficiency Bonus when you roll Initiative.
+        initiative += 2;
+        break;
+      case "Crafter":
+        // "Gain proficiency with three different sets of Artisan’s Tools.
+        pickNMore(ARTISANS_TOOLS, 3, proficiencies);
+        break;
+      case "Magic Initiate (Cleric)":
+        // "You gain two cantrips and one level 1 spell from the Cleric spell list.",
+        bonuses.spellSave = 10 + bonuses.WIS;
+        spells.unshift(...[
+          "Mending (lvl 0)",
+          "Resistance (lvl 0)",
+        ]);
+        spells.push("Detect Magic (lvl 1)");
+        break;
+      case "Magic Initiate (Druid)":
+        // "You gain two cantrips and one level 1 spell from the Druid spell list.",
+        bonuses.spellSave = 10 + bonuses.WIS;
+        spells.unshift(...[
+          "Mending (lvl 0)",
+          "Message (lvl 0)",
+        ])
+        spells.push("Longstrider (lvl 1)");
+        break;
+      case "Magic Initiate (Wizard)":
+        // "You gain two cantrips and one level 1 spell from the Wizard spell list.",
+        bonuses.spellSave = 10 + bonuses.INT;
+        spells.unshift(...[
+          "Friends (lvl 0)",
+          "Fire Bolt (lvl 0)",
+        ])
+        spells.push("Disguise Self (lvl 1)");
         attacks.push({
-          name: "Unarmed Strike",
-          attr: "STR",
-          damage: "1d4",
-          damageType: "Bludgeoning"
+          name: "Fire Bolt",
+          attr: "INT",
+          damage: "1d10",
+          damageType: "Fire"
         });
-      }
-      break;
-    case "Tough":
-      // "When you first gain this Origin feat, your Hit Point maximum increases by twice your character level."
-      HP += 2;
-      break;
+        break;
+      case "Musician":
+        // "You gain proficiency with three musical instruments of your choice."
+        pickNMore(MUSICAL_INSTRUMENTS, 3, proficiencies);
+        break;
+      case "Skilled":
+        // "You gain proficiency in any combination of three skills or tools of your choice.",
+        pickNMore([...CORE_SKILLS, ...ARTISANS_TOOLS], 3, proficiencies);
+        break;
+      case "Tavern Brawler":
+        // (only apply if class is not Monk, since Monk's unarmed strike is better)
+        if (className !== "Monk") {
+          attacks.push({
+            name: "Unarmed Strike",
+            attr: "STR",
+            damage: "1d4",
+            damageType: "Bludgeoning"
+          });
+        }
+        break;
+      case "Tough":
+        // "When you first gain this Origin feat, your Hit Point maximum increases by twice your character level."
+        HP += 2;
+        break;
+    }
+  });
+
+  // Species mods
+  if (species === "Dwarf") {
+    // Dwarven Toughness
+    HP += 1;
   }
 
   // Rogue expertise
@@ -1564,6 +1813,7 @@ const newPC = ({ classOverride = "", oldSchool = false }) => {
   }
 
   const features = [
+    ...speciesMods.features,
     ...classMods.features,
     generateOriginFeat(originMods.feat),
   ];
@@ -1589,7 +1839,7 @@ const newPC = ({ classOverride = "", oldSchool = false }) => {
   };
   localStorage.setItem("savedPC", JSON.stringify(pcData));
   return pcData;
-}
+};
 
 document.addEventListener("DOMContentLoaded", () => {
   const btnAnother = document.querySelector("button#btnGenerate");

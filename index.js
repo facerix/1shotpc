@@ -1,0 +1,1615 @@
+import { jsx } from "./src/domUtils.js";
+
+const oneOf = (array) => {
+  const idx = Math.floor(Math.random() * array.length);
+  return array[idx] ?? "";
+};
+
+const pickNMore = (array, n, existingSet) => {
+  let idx = 0;
+  const targetSize = existingSet.size + n;
+  if (array.length < n) {
+    throw new Error("Not enough options in the target list");
+  }
+
+  do {
+    idx = Math.floor(Math.random() * array.length);
+    existingSet.add(array[idx]);
+  } while (existingSet.size < targetSize);
+  return existingSet;
+};
+
+const BASE_CLASSES = [
+  "Barbarian",
+  "Bard",
+  "Cleric",
+  "Druid",
+  "Fighter",
+  "Monk",
+  "Paladin",
+  "Ranger",
+  "Rogue",
+  "Sorcerer",
+  "Warlock",
+  "Wizard"
+];
+
+const ATTRS = [
+  "STR",
+  "DEX",
+  "CON",
+  "INT",
+  "WIS",
+  "CHA",
+];
+
+const STAT_ARRAY_BY_CLASS = {
+  "Barbarian": [15, 13, 14, 10, 12, 8],
+  "Bard": [8, 14, 12, 13, 10, 15],
+  "Cleric": [14, 8, 13, 10, 15, 12],
+  "Druid": [8, 12, 14, 13, 15, 10],
+  "Fighter": [15, 14, 13, 8, 10, 12],
+  "Monk": [12, 15, 13, 10, 14, 8],
+  "Paladin": [15, 10, 13, 8, 12, 14],
+  "Ranger": [12, 15, 13, 8, 14, 10],
+  "Rogue": [12, 15, 13, 14, 10, 8],
+  "Sorcerer": [10, 13, 14, 8, 12, 15],
+  "Warlock": [8, 14, 13, 12, 10, 15],
+  "Wizard": [8, 12, 13, 15, 14, 10],
+};
+
+const BASE_SPECIES = [
+  "Aasimar",
+  "Dragonborn",
+  "Dwarf",
+  "Elf",
+  "Gnome",
+  "Goliath",
+  "Halfling",
+  "Human",
+  "Orc",
+  "Tiefling",
+];
+
+const SMALL_SPECIES = ["Gnome", "Halfling"];
+
+const ORIGIN_FEATS = {
+  "Alert": "Add your Proficiency Bonus when you roll Initiative. Can also swap your Initiative with a willing ally in the same combat.",
+  "Crafter": "Gain proficiency with three different sets of Artisan’s Tools. Gain a 20 percent discount on nonmagical items. Can craft an item from a Fast Crafting table, which lasts until you finish another Long Rest.",
+  "Healer": "When you Utilize a Healer’s Kit as an action, a creature can expend one of its Hit Point Dice to heal. Your Proficiency Bonus is added to the roll. When you roll to determine Hit Points when healing with this feature or a spell, you can reroll the dice if it rolls a 1. You must use the new roll.",
+  "Lucky": "After finishing a Long Rest, you have a number of Luck Points equal to your Proficiency Bonus. You can expend one when you make a D20 Test to give yourself Advantage. You can also expend one to impose Disadvantage when a creature rolls a d20 to make an attack roll against you.",
+  "Magic Initiate (Cleric)": "You gain two cantrips and one level 1 spell from the Cleric spell list. You can cast these spells once per Long Rest without expending a spell slot, and can cast them again using spell slots. Wisdom is your spellcasting ability for your Cleric spells.",
+  "Magic Initiate (Druid)": "You gain two cantrips and one level 1 spell from the Druid spell list. You can cast these spells once per Long Rest without expending a spell slot, and can cast them again using spell slots. Wisdom is your spellcasting ability for your Druid spells.",
+  "Magic Initiate (Wizard)": "You gain two cantrips and one level 1 spell from the Wizard spell list. You can cast these spells once per Long Rest without expending a spell slot, and can cast them again using spell slots. Intelligence is your spellcasting ability for your Wizard spells.",
+  "Musician": "You gain proficiency with three musical instruments of your choice. At the end of a Short or Long Rest, you may play the instrument and grant Heroic Inspiration to a number of allies equal to your Proficiency Bonus.",
+  "Savage Attacker": "Once per turn, when you hit a target with a weapon attack, you can roll the weapon damage dice twice and use either roll against the target.",
+  "Skilled": "You gain proficiency in any combination of three skills or tools of your choice. You can take this feat more than once.",
+  "Tavern Brawler": "When you hit with an Unarmed Strike and deal damage, you can deal 1d4 + your Strength modifier. If the damage dice for your Unarmed Strikes roll is a 1, you can reroll it and must use the new roll. You have proficiency with improvised weapons. Once per turn, when you hit a creature with an Unarmed Strike as part of the Attack action, in addition to dealing damage, you can push the target 5 feet away from you.",
+  "Tough": "Your Hit Point maximum increases by twice your character level.",
+}
+
+const ARTISANS_TOOLS = [
+  "Alchemist's Supplies",
+  "Brewer's Supplies",
+  "Calligrapher's Supplies",
+  "Carpenter's Tools",
+  "Cartographer's Tools",
+  "Cobbler's Tools",
+  "Cook's Utensils",
+  'Disguise Kit',
+  'Forgery Kit',
+  "Glassblower's Tools",
+  'Herbalism Kit',
+  "Jeweler's Tools",
+  "Leatherworker's Tools",
+  "Mason's Tools",
+  "Navigator's Tools",
+  "Painter's Supplies",
+  "Potter's Tools",
+  "Smith's Tools",
+  "Tinker's Tools",
+  "Thieves' Tools",
+  "Weaver's Tools",
+  "Woodcarver's Tools",
+]
+
+const LIGHT_ARMOR = {
+  "Padded Armor": 11,
+  "Leather Armor": 11,
+  "Studded Leather Armor": 12,
+};
+
+const MEDIUM_ARMOR = {
+  "Hide Armor": 12,
+  "Chain Shirt": 13,
+  "Scale Mail": 14,
+  "Breastplate": 14,
+  "Half Plate Armor": 15,
+};
+
+const HEAVY_ARMOR = {
+  "Ring Mail": 14,
+  "Chain Mail": 16,
+  "Splint Armor": 17,
+  "Plate Armor": 18,
+};
+
+const GAMING_SETS = ["Dice", "Dragonchess", "Playing cards", "Three-dragon ante"];
+
+const MUSICAL_INSTRUMENTS = ["Bagpipes", "Drum", "Dulcimer", "Flute", "Horn", "Lute", "Lyre", "Pan Flute", "Shawm", "Viol"];
+
+const FIRST_NAMES_BY_SPECIES = {
+  Aasimar: ['Arveene', 'Diero', 'Galladia', 'Evendur', 'Jhessail', 'Hunin', 'Myllandra', 'Kyor', 'Nephis', 'Madislak', 'Reani', 'Mykiel', 'Selise', 'Tadriel', 'Seraphina', 'Taman', 'Yasha', 'Valandras', 'Zora', 'Zasheir'],
+  Dragonborn: [
+    "Andujar", "Armagan", "Armek", "Arzan", "Axaran", "Belaxarim", "Brevarr", "Djemidor", "Draxan", "Fayal", "Grax", "Iojad", "Inzul", "Khiraj", "Kreytzen", "Lejek",
+    "Mar", "Nazir", "Nedam", "Nevek", "Ravaran", "Razaan", "Sarax", "Sarram", "Savaxis", "Siangar", "Sirizan", "Sunan", "Szuran", "Tajan", "Tamajon", "Tenahn", "Toxal", "Tzegyr", "Vantajar", "Vharkus", "Xafiq", "Zarkhil",
+    "Artana", "Kalas", "Khagra", "Leytra", "Myrka", "Naya", "Sarcha", "Shirren", "Sirivistra", "Sufana", "Tamara", "Vrumadi", "Zovra"
+  ],
+  Dwarf: [
+    "Agaro", "Arnan", "Auxlan", "Avamir", "Baelnar", "Balfam", "Bariken", "Borkûl", "Darkûl", "Dolmen", "Dyrnar", "Erag", "Ezegan", "Ferrek", "Garmûl", "Glint", "Ghorvas", "Grimmalk",
+    "Haeltar", "Halagmar", "Halzar", "Hlant", "Korlag", "Krag", "Krim", "Kurman", "Lurtrum", "Malagar", "Mardam", "Maulnar", "Melgar", "Morak", "Orobok", "Rogath", "Roken", "Rozag", "Sabakzar", "Sharak", "Smethykk", "Swargar", "Thorbalt", "Thorin", "Tredigar", "Vabûl", "Vistrum", "Wolvar",
+    "Beyla", "Fenryl", "Grenenzel", "Krystolari", "Lokara", "Lurka", "Marnia", "Praxana", "Rokel", "Roksana", "Thurlfara", "Vauldra", "Veklani", "Vronwe", "Zebel"
+  ],
+  Elf: [
+    "Alarcion", "Alathar", "Ariandar", "Arromar", "Borel", "Bvachan", "Carydion", "Elgoth", "Farlien", "Ferel", "Gaerlan", "Iafalior", "Kaelthorn", "Laethan", "Leliar", "Leodor", "Lorak", "Lorifir", "Morian", "Oleran", "Rylef", "Savian", "Seylas", "Tevior", "Veyas",
+    "Aryllan", "Atalya", "Ayrthwil", "Irva", "Lyfalia", "Ronefel", "Thirya", "Velene", "Venefiq", "Zereni"
+  ],
+  Gnome: [
+    "Alston", "Alvyn", "Boddynock", "Brocc", "Burgell", "Dimble", "Eldon", "Erky", "Fonkin", "Frug", "Gerbo", "Gimble", "Glim", "Jebeddo", "Kellen", "Namfoodle", "Orryn", "Roondar", "Seebo", "Sindri", "Warryn", "Wrenn", "Zook",
+    "Bimpnottin", "Breena", "Caramip", "Carlin", "Donella", "Duvamil", "Ella", "Ellyjobell", "Ellywick", "Lilli", "Loopmottin", "Lorilla", "Mardnab", "Nissa", "Nyx", "Oda", "Orla", "Roywyn", "Shamil", "Tana", "Waywocket", "Zanna",
+  ],
+  Goliath: ["Aukan", "Eglath", "Gae-Al", "Gauthak", "Ilikan", "Keothi", "Kuori", "Lo-Kag", "Manneo", "Maveith", "Nalla", "Orilo", "Paavu", "Pethani", "Thalai", "Thotham", "Uthal", "Vaunea", "Vimak"],
+  Halfling: [
+    "Arthan", "Carvin", "Corby", "Cullen", "Egen", "Ernest", "Gedi", "Heron", "Jeryl", "Keffen", "Kylem", "Kynt", "Leskyn", "Neff", "Orne", "Quarrel", "Rabbit", "Rilkin", "Snakebait", "Tarfen", "Titch", "Tuck", "Whim",
+    "Caliope", "Emily", "Piper", "Rixi", "Sabretha", "Teg", "Tilly", "Toira", "Vexia", "Vil", "Vzani", "Zanthe", "Ziza"
+  ],
+  Human: [
+    "Anlow", "Arando", "Bram", "Cale", "Dalkon", "Daylen", "Dodd", "Dungarth", "Dyrk", "Eandro", "Falken", "Feck", "Fenton", "Gryphero", "Hagar", "Jeras", "Krynt", "Lavant", "Leyten",
+    "Madian", "Malfier", "Markus", "Meklan", "Namen", "Navaren", "Nerle", "Nilus", "Ningyan", "Norris", "Quentin", "Semil", "Sevenson", "Steveren", "Talfen", "Tamond", "Taran", "Tavon", "Tegan", "Vanan", "Vincent",
+    "Azura", "Brey", "Hallan", "Kasaki", "Lorelei", "Mirabel", "Pharana", "Remora", "Rosalyn", "Sachil", "Saidi", "Tanika", "Tura", "Tylsa", "Vencia", "Xandrilla"
+  ],
+  Orc: [
+    "Dench", "Feng", "Gell", "Henk", "Holg", "Imsh", "Keth", "Krusk", "Mhurren", "Ront", "Shump", "Thokk",
+    "Baggi", "Emen", "Engong", "Kansif", "Myev", "Neega", "Ovak", "Ownka", "Shautha", "Sutha", "Vola", "Volen", "Yevelda"
+  ],
+  Tiefling: [
+    "Ankhus", "Arkadi", "Armarius", "Armillius", "Archidius", "Balmoloch", "Calderax", "Cavian", "Cenereth", "Chorum", "Corynax", "Dacian", "Daelius", "Damaceus", "Decimeth", "Demedor", "Demerian", "Dynachus", "Grassus",
+    "Halius", "Heleph", "Incirion", "Kalaradian", "Kamien", "Kazimir", "Kzandro", "Machem", "Maetheus", "Malfias", "Marchion", "Menerus", "Namazeus", "Nensis", "Prismeus", "Pyranikus", "Razortail", "Sejanus", "Severian",
+    "Suffer", "Syken", "Tarkus", "Vaius", "Xerek", "Zeth", "Zevon",
+    "Affyria", "Cataclysmia", "Domitia", "Dorethau", "Excellence", "Hacari", "Iritra", "Lachira", "Levatra", "Mecretia", "Milvia", "Nericia", "Precious", "Rain", "Samantia", "Sunshine", "Tenerife", "Traya", "Velavia", "Zaidi", "Zethaya"
+  ],
+};
+
+const LAST_NAMES_BY_SPECIES = {
+  Aasimar: [],
+  Dragonborn: ["Clethtinthiallor", "Daardendrian", "Delmirev", "Drachedandion", "Fenkenkabradon", "Kepeshkmolik", "Kerrhylon", "Kimbatuul", "Linxakasendalor", "Myastan", "Nemmonis", "Norixius", "Ophinshtalajiir", "Prexijandilin", "Shestendeliath", "Turnuroth", "Verthisathurgiesh", "Yarjerit"],
+  Dwarf: ["Ambershard", "Barrelhelm", "Copperhearth", "Deepmiddens", "Drakantal", "Evermead", "Garkalan", "Grimtor", "Hackshield", "Irongull", "Markolak", "Ramcrown", "Rockharvest", "Silvertarn", "Skandalor", "Zarkanan"],
+  Elf: ["Autumnloft", "Balefrost", "Briarfell", "Evenwind", "Graytrails", "Mooncairn", "Riverwall", "Stormwolf", "Summergale", "Sunshadow", "Woodenhawk"],
+  Gnome: ["Beren", "Daergel", "Folkor", "Garrick", "Nackle", "Murnig", "Ningel", "Raulnor", "Scheppen", "Timbers", "Turen"],
+  Goliath: [
+    "Bearkiller", "Dawncaller", "Fearless", "Flintfinder", "Horncarver", "Keeneye", "Lonehunter", "Longleaper", "Rootsmasher", "Skywatcher", "Steadyhand", "Threadtwister", "Twice-Orphaned", "Twistedlimb", "Wordpainter",
+    "Anakalathai", "Elanithino", "Gathakanathi", "Kalagiano", "Katho-Olavi", "Kolae-Gileana", "Ogolakanu", "Thuliaga", "Thunukalathi", "Vaimei-Laga",
+  ],
+  Halfling: ["Angler", "Battlestone", "Blackwater", "Daggersharp", "Deepstrider", "Hollowpot", "Puddle", "Raftmite", "Skiprock", "Silverfin", "Tanglestrand", "Tricker", "Willowrush", "Yellowcrane"],
+  Human: [
+    "Arkalis", "Armanci", "Bilger", "Blackstrand", "Brightwater", "Carnavon", "Caskajaro", "Coldshore", "Coyle", "Cresthill", "Cuttlescar", "Daargen", "Dalicarlia", "Danamark", "Donoghan", "Drumwind",
+    "Dunhall", "Ereghast", "Falck", "Fallenbridge", "Faringray", "Fletcher", "Fryft", "Goldrudder", "Grantham", "Graylock", "Gullscream", "Hindergrass", "Iscalon", "Kreel", "Kroft", "Lamoth", "Leerstrom",
+    "Lynchfield", "Moonridge", "Netheridge", "Oakenheart", "Pyncion", "Ratley", "Redraven", "Revenmar", "Roxley", "Sell", "Seratolva", "Shanks", "Shattermast", "Shaulfer", "Silvergraft", "Stavenger",
+    "Stormchapel", "Strong", "Swiller", "Talandro", "Targana", "Towerfall", "Umbermoor", "Van Devries", "Van Gandt", "Van Hyden", "Varcona", "Varzand", "Voortham", "Vrye", "Webb", "Welfer", "Wilxes", "Wintermere", "Wygarthe", "Zatchet", "Zethergyll"
+  ],
+  Orc: [],
+  Tiefling: ["Amarzian", "Carnago", "Domarien", "Iscitan", "Meluzan", "Menetrian", "Paradas", "Romazi", "Sarzan", "Serechor", "Shadowhorn", "Szereban", "Torzalan", "Trelenus", "Trevethor", "Tryphon", "Vadu", "Vrago"]
+};
+
+const BACKGROUNDS_BY_ATTR = {
+  "Strength": [
+    "Artisan",
+    "Entertainer",
+    "Farmer",
+    "Guard",
+    "Noble",
+    "Sailor",
+    "Soldier",
+  ],
+  "Dexterity": [
+    "Artisan",
+    "Charlatan",
+    "Criminal",
+    "Entertainer",
+    "Guide",
+    "Sailor",
+    "Scribe",
+    "Soldier",
+    "Wayfarer",
+  ],
+  "Constitution": [
+    "Charlatan",
+    "Criminal",
+    "Farmer",
+    "Guide",
+    "Hermit",
+    "Merchant",
+    "Sage",
+    "Soldier",
+  ],
+  "Intelligence": [
+    "Acolyte",
+    "Artisan",
+    "Criminal",
+    "Guard",
+    "Merchant",
+    "Noble",
+    "Sage",
+    "Scribe",
+  ],
+  "Wisdom": [
+    "Acolyte",
+    "Farmer",
+    "Guard",
+    "Guide",
+    "Hermit",
+    "Sage",
+    "Sailor",
+    "Scribe",
+    "Wayfarer",
+  ],
+  "Charisma": [
+    "Acolyte",
+    "Charlatan",
+    "Entertainer",
+    "Hermit",
+    "Merchant",
+    "Noble",
+    "Wayfarer",
+  ],
+};
+
+const CLASSES_BY_BEST_ATTR = {
+  STR: ["Barbarian", "Fighter", "Paladin"],
+  DEX: ["Fighter", "Monk", "Ranger", "Rogue"],
+  CON: ["Barbarian"],
+  INT: ["Wizard"],
+  WIS: ["Cleric", "Druid", "Monk", "Ranger"],
+  CHA: ["Bard", "Paladin", "Sorcerer", "Warlock"],
+};
+
+const BACKGROUNDS_BY_CLASS = {
+  "Barbarian": [
+    ...BACKGROUNDS_BY_ATTR.Strength,
+  ],
+  "Bard": [
+    ...BACKGROUNDS_BY_ATTR.Charisma,
+  ],
+  "Cleric": [
+    ...BACKGROUNDS_BY_ATTR.Wisdom,
+  ],
+  "Druid": [
+    ...BACKGROUNDS_BY_ATTR.Wisdom,
+  ],
+  "Fighter": [
+    ...BACKGROUNDS_BY_ATTR.Strength,
+    ...BACKGROUNDS_BY_ATTR.Dexterity,
+  ],
+  "Monk": [
+    ...BACKGROUNDS_BY_ATTR.Dexterity,
+    ...BACKGROUNDS_BY_ATTR.Wisdom,
+  ],
+  "Paladin": [
+    ...BACKGROUNDS_BY_ATTR.Strength,
+    ...BACKGROUNDS_BY_ATTR.Charisma,
+  ],
+  "Ranger": [
+    ...BACKGROUNDS_BY_ATTR.Dexterity,
+    ...BACKGROUNDS_BY_ATTR.Wisdom,
+  ],
+  "Rogue": [
+    ...BACKGROUNDS_BY_ATTR.Dexterity,
+  ],
+  "Sorcerer": [
+    ...BACKGROUNDS_BY_ATTR.Charisma,
+  ],
+  "Warlock": [
+    ...BACKGROUNDS_BY_ATTR.Charisma,
+  ],
+  "Wizard": [
+    ...BACKGROUNDS_BY_ATTR.Intelligence,
+  ]
+};
+
+const MONK_TOOL_OR_INSTRUMENT = oneOf([...ARTISANS_TOOLS, ...MUSICAL_INSTRUMENTS]);
+const MODS_BY_CLASS = {
+  Barbarian: {
+    skills: ["Athletics", "Intimidation"],
+    saves: ["STR", "CON"],
+    equipment: [
+      "Greataxe", "Handaxe (4)", "Explorer's Pack"
+    ],
+    gold: 15,
+    features: [
+      {
+        name: "Rage",
+        desc: `<p>Two times per day, as a bonus action, you can imbue yourself with a primal power called Rage, a force that grants you extraordinary might and resilience.</p>
+        <p>You regain one expended use when you finish a Short Rest, and you regain all expended uses when you finish a Long Rest.</p>
+        <ul>While raging, you have:
+          <li>Damage Resistance. You have Resistance to Bludgeoning, Piercing, and Slashing damage.</li>
+          <li>Rage Damage. When you make an attack using Strength—with either a weapon or an Unarmed Strike—and deal damage to the target, you gain a bonus +2 to the damage.</li>        
+          <li>Strength Advantage. You have Advantage on Strength checks and Strength saving throws.</li>
+        </ul>
+
+        <ul>Your Rage lasts until the end of your next turn, but you can keep it going by:
+          <li>Making an attack roll against an enemy.</li>
+          <li>Forcing an enemy to make a saving throw.</li>
+          <li>Taking a Bonus Action to extend your Rage.</li>
+        </ul>
+        <p>You can maintain a Rage for up to 10 minutes.</p>`
+      },
+      `Cleave: If you hit a creature with your Greataxe, you can make a melee attack roll with the weapon against a second creature within
+        5 feet of the first that is also within your reach. On a hit, the second creature takes the weapon’s damage, but don’t add your ability modifier to that damage unless
+        that modifier is negative. You can make this extra attack only once per turn.`,
+      `Vex: If you hit a creature with a Handaxe and deal damage, you have Advantage on your next attack roll against that creature before the end of your next turn.`
+    ]
+  },
+  Bard: {
+    skills: ["Performance", "Persuasion", "Insight"],
+    saves: ["DEX", "CHA"],
+    equipment: [
+      "Leather Armor", "2 Daggers", oneOf(MUSICAL_INSTRUMENTS), "Entertainer’s Pack"
+    ],
+    gold: 19,
+    features: [
+      `<strong>Bardic Inspiration</strong>: You can supernaturally inspire others through words, music, or dance. This inspiration is represented by your Bardic Inspiration die, which is a d6.
+        
+        <p>As a Bonus Action, you can inspire another creature within 60 feet of yourself who can see or hear you. That creature gains one of your Bardic Inspiration dice. A creature can have only one Bardic Inspiration die at a time.</p>
+        
+        <p>Once within the next hour when the creature fails a D20 Test, the creature can roll the Bardic Inspiration die and add the number rolled to the d20, potentially turning the failure into a success. A Bardic Inspiration die is expended when it’s rolled.</p>
+        
+        <p>You can confer a Bardic Inspiration die a number of times equal to your Charisma modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.</p>`,
+      `Spellcasting: You have 2 level-1 spell slots that recharge on a long rest. You can cast your cantrips (level 0 spells) as often as you want. Charisma is your spellcasting ability for your Bard spells.`
+    ],
+    spells: [
+      "Dancing Lights (lvl 0)",
+      "Vicious Mockery (lvl 0)",
+      "Charm Person (lvl 1)",
+      "Color Spray (lvl 1)",
+      "Dissonant Whispers (lvl 1)",
+      "Healing Word (lvl 1)"
+    ]
+  },
+  Cleric: {
+    skills: ["Medicine", "Religion", "Arcana"],
+    saves: ["WIS", "CHA"],
+    equipment: [
+      "Chain Shirt", "Shield", "Mace", "Holy Symbol", "Priest’s Pack"
+    ],
+    gold: 7,
+    features: [
+      "Spellcasting: You have 2 level-1 spell slots that recharge on a long rest. You can cast your cantrips (level 0 spells) as often as you want. Wisdom is your spellcasting ability for your Cleric spells.",
+    ],
+    spells: [
+      "Guidance (lvl 0)",
+      "Light (lvl 0)",
+      "Sacred Flame (lvl 0)",
+      "Thaumaturgy (lvl 0)",
+      "Bless (lvl 1)",
+      "Cure Wounds (lvl 1)",
+      "Guiding Bolt (lvl 1)",
+      "Shield of Faith (lvl 1)",
+    ]
+  },
+  Druid: {
+    skills: ["Survival", "Nature", "Arcana"],
+    saves: ["INT", "WIS"],
+    equipment: [
+      "Leather Armor", "Shield", "Sickle", "Druidic Focus (Quarterstaff)", "Explorer’s Pack", "Herbalism Kit"
+    ],
+    gold: 9,
+    features: [
+      "Spellcasting: You have 2 level-1 spell slots that recharge on a long rest. You can cast your cantrips (level 0 spells) as often as you want. Wisdom is your spellcasting ability for your Druid spells.",
+      "Druidic: You know Druidic, the secret language of Druids. You can use Druidic to leave hidden messages. You and others who know Druidic automatically spot such a message.",
+    ],
+    spells: [
+      "Druidcraft (lvl 0)",
+      "Produce Flame (lvl 0)",
+      "Animal Friendship (lvl 1)",
+      "Speak with Animals (lvl 1)",
+      "Cure Wounds (lvl 1)",
+      "Faerie Fire (lvl 1)",
+      "Thunderwave (lvl 1)"
+    ]
+  },
+  Fighter: {
+    skills: ["Athletics", "Perception"],
+    saves: ["STR", "CON"],
+    equipment: [
+      "Chain Mail", "Greatsword", "Flail", "8 Javelins", "Dungeoneer’s Pack"
+    ],
+    gold: 4,
+    features: [
+      `Second Wind: You have a limited well of physical and mental stamina that you can draw on. As a Bonus Action, you can use it to regain Hit Points equal to 1d10+1.
+      You can use this feature twice. You regain one expended use when you finish a Short Rest, and you regain all expended uses when you finish a Long Rest.`,
+      `Defense fighting style: While you’re wearing Light, Medium, or Heavy armor, you gain a +1 bonus to Armor Class`,
+      `Graze: If your Greatsword attack roll misses a creature, you can deal damage to that creature equal to the ability modifier you used to make the attack roll. This damage is the same type dealt by the weapon, and the damage can be increased only by increasing the ability modifier.`,
+      `Sap: If you hit a creature with your Flail, that creature has Disadvantage on its next attack roll before the start of your next turn.`,
+      `Slow: If you hit a creature with your Javelin and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn. If the creature is hit more than once by weapons that have this property, the Speed reduction doesn’t exceed 10 feet.`,
+    ],
+  },
+  Monk: {
+    skills: ["Acrobatics", "History", MONK_TOOL_OR_INSTRUMENT],
+    saves: ["STR", "DEX"],
+    equipment: [
+      "Spear", "5 Daggers", MONK_TOOL_OR_INSTRUMENT, "Explorer’s Pack"
+    ],
+    gold: 11,
+    features: [
+      `Martial Arts: Your practice of martial arts gives you mastery of combat styles that use your Unarmed Strike and Monk weapons, as follows:
+        <p>Bonus Unarmed Strike. You can make an Unarmed Strike as a Bonus Action.</p>
+        <p>Martial Arts Die. You can roll 1d6 in place of the normal damage of your Unarmed Strike or Monk weapons. This die changes as you gain Monk levels, as shown in the Martial Arts column of the Monk Features table.</p>
+        <p>Dexterous Attacks. You can use your Dexterity modifier instead of your Strength modifier for the attack and damage rolls of your Unarmed Strikes and Monk weapons. In addition, when you use the Grapple or Shove option of your Unarmed Strike, you can use your Dexterity modifier instead of your Strength modifier to determine the save DC.</p>`
+    ],
+  },
+  Paladin: {
+    skills: ["Insight", "Religion"],
+    saves: ["WIS", "CHA"],
+    equipment: [
+      "Chain Mail", "Shield", "Longsword", "6 Javelins", "Holy Symbol", "Priest’s Pack"
+    ],
+    gold: 9,
+    features: [
+      `Lay On Hands: Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you finish a Long Rest. With that pool, you can restore a total of 5 Hit Points.
+        <p>As a Bonus Action, you can touch a creature (which could be yourself) and draw power from the pool of healing to restore a number of Hit Points to that creature, up to the maximum amount remaining in the pool.</p>
+        <p>You can also expend 5 Hit Points from the pool of healing power to remove the Poisoned condition from the creature; those points don’t also restore Hit Points to the creature.</p>`,
+      "Spellcasting: You have 2 level-1 spell slots that recharge on a long rest. You can cast your cantrips (level 0 spells) as often as you want. Charisma is your spellcasting ability for your Paladin spells.",
+      `Sap: If you hit a creature with your Longsword, that creature has Disadvantage on its next attack roll before the start of your next turn.`,
+      `Slow: If you hit a creature with your Javelin and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn. If the creature is hit more than once by weapons that have this property, the Speed reduction doesn’t exceed 10 feet.`,
+    ],
+    spells: [
+      "Guidance (lvl 0)",
+      "Word of Radiance (lvl 0)",
+      "Heroism (lvl 1)",
+      "Divine Smite (lvl 1)"
+    ]
+  },
+  Ranger: {
+    skills: ["Animal Handling", "Nature", "Survival"],
+    saves: ["STR", "DEX"],
+    equipment: [
+      "Studded Leather Armor", "Scimitar", "Shortsword", "Longbow", "20 Arrows", "Quiver", "Druidic Focus (sprig of mistletoe)", "Explorer’s Pack"
+    ],
+    gold: 7,
+    features: [
+      "Spellcasting: You have 2 level-1 spell slots that recharge on a long rest. Wisdom is your spellcasting ability for your Ranger spells.",
+      "Favored Enemy: You always have the Hunter’s Mark spell prepared. You can cast it twice without expending a spell slot, and you regain all expended uses of this ability when you finish a Long Rest.",
+      `Nick: You can make a bonus attack with your Scimitar as part of the same Attack action as your Shortsword.`,
+      `Slow: If you hit a creature with your Longbow and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn.`
+    ],
+    spells: [
+      "Cure Wounds",
+      "Hail of Thorns",
+      "Hunter’s Mark",
+    ],
+  },
+  Rogue: {
+    skills: ["Deception", "Investigation", "Sleight of Hand", "Stealth", "Thieves' Tools"],
+    saves: ["DEX", "INT"],
+    equipment: [
+      "Leather Armor", "2 Daggers", "Shortsword", "Shortbow", "20 Arrows", "Quiver", "Thieves’ Tools", "Burglar’s Pack"
+    ],
+    gold: 8,
+    features: [
+      `Expertise: Your proficiency bonus is doubled for Sleight of Hand and Stealth.`,
+      `Thieves’ Cant: You picked up various languages in the communities where you plied your roguish talents. You know Thieves’ Cant and one other language of your choice`,
+      `Nick: You can make a bonus attack with your Dagger as part of the same Attack action as your Shortsword.`,
+      `Vex: If you hit a creature with a Shortbow and deal damage, you have Advantage on your next attack roll against that creature before the end of your next turn.`
+    ],
+  },
+  Sorcerer: {
+    skills: ["Persuasion", "Intimidation"],
+    saves: ["CON", "CHA"],
+    equipment: [
+      "Spear", "2 Daggers", "Arcane Focus (crystal)", "Dungeoneer’s Pack",
+    ],
+    gold: 28,
+    features: [
+      "Spellcasting: You have 2 level-1 spell slots that recharge on a long rest. You can cast your cantrips (level 0 spells) as often as you want. Charisma is your spellcasting ability for your Sorcerer spells.",
+      `Innate Sorcery: You are infused with simmering magic. As a Bonus Action, you can unleash it for 1 minute, during which you gain the following benefits:
+        <p>The spell save DC of your Sorcerer spells increases by 1.</p>
+        <p>You have Advantage on the attack rolls of Sorcerer spells you cast.</p>
+        <p>You can use this feature twice, and you regain all expended uses of it when you finish a Long Rest.</p>`
+    ],
+    spells: [
+      "Light (lvl 0)",
+      "Prestidigitation (lvl 0)",
+      "Shocking Grasp (lvl 0)",
+      "Sorcerous Burst (lvl 0)",
+      "Burning Hands (lvl 1)",
+      "Feather Fall (lvl 1)",
+    ]
+  },
+  Warlock: {
+    skills: ["Arcana", "Deception"],
+    saves: ["WIS", "CHA"],
+    equipment: [
+      "Leather Armor", "Sickle", "2 Daggers", "Arcane Focus (orb)", "Book (occult lore)", "Scholar’s Pack",
+    ],
+    gold: 15,
+    features: [
+      "Pact Magic: You have 1 level-1 spell slot that recharges on a short rest. You can cast your cantrips (level 0 spells) as often as you want. Charisma is your spellcasting ability for your Warlock spells.",
+    ],
+    spells: [
+      "Eldritch Blast (lvl 0)",
+      "Prestidigitation (lvl 0)",
+      "Hex (lvl 1)",
+      "Witch Bolt (lvl 1)",
+    ]
+  },
+  Wizard: {
+    skills: ["Arcana", "History"],
+    saves: ["INT", "WIS"],
+    equipment: [
+      "2 Daggers", "Arcane Focus (Quarterstaff)", "Robe", "Spellbook", "Scholar’s Pack"
+    ],
+    gold: 5,
+    features: [
+      "Spellcasting: You have 2 level-1 spell slots that recharge on a long rest. You can cast your cantrips (level 0 spells) as often as you want. Intelligence is your spellcasting ability for your Wizard spells.",
+      `Arcane Recovery: You can regain some of your magical energy by studying your spellbook. When you finish a Short Rest, you can choose to recover one 1st-level spell slot.      
+        <p>Once you use this feature, you can’t do so again until you finish a Long Rest.</p>`
+    ],
+    spells: [
+      "Light (lvl 0)",
+      "Mage Hand (lvl 0)",
+      "Ray of Frost (lvl 0)",
+      "Detect Magic (lvl 1)",
+      "Feather Fall (lvl 1)",
+      "Mage Armor (lvl 1)",
+      "Magic Missile (lvl 1)",
+      "Sleep (lvl 1)",
+      "Thunderwave (lvl 1)",
+    ]
+  },
+}
+
+const ATTACKS_BY_CLASS = {
+  Barbarian: ["Greataxe", "Handaxe", "Rage"],
+  Bard: ["Dagger", "Vicious Mockery", "Color Spray", "Dissonant Whispers"],
+  Cleric: ["Mace", "Sacred Flame", "Guiding Bolt"],
+  Druid: ["Sickle", "Quarterstaff", "Thunderwave"],
+  Fighter: ["Greatsword", "Flail", "Javelin"],
+  Monk: ["Spear", "Dagger", "Unarmed Strike"],
+  Paladin: ["Longsword", "Javelin", "Word of Radiance", "Divine Smite"],
+  Ranger: ["Scimitar", "Shortsword", "Longbow", "Hail of Thorns", "Hunter’s Mark"],
+  Rogue: ["Dagger", "Shortsword", "Shortbow", "Sneak Attack"],
+  Sorcerer: ["Spear", "Dagger", "Shocking Grasp", "Sorcerous Burst", "Burning Hands"],
+  Warlock: ["Sickle", "Dagger", "Eldritch Blast", "Hex", "Witch Bolt"],
+  Wizard: ["Dagger", "Ray of Frost", "Magic Missile", "Sleep", "Thunderwave"],
+};
+
+const ATTACKS = {
+  "Dagger": {
+    attr: "DEX",
+    damage: "1d4",
+    damageType: "Piercing",
+  },
+  "Flail": {
+    attr: "STR",
+    damage: "1d8",
+    damageType: "Bludgeoning",
+  },
+  "Greataxe": {
+    attr: "STR",
+    damage: "1d12",
+    damageType: "Slashing",
+  },
+  "Greatsword": {
+    attr: "STR",
+    damage: "2d6",
+    damageType: "Slashing",
+  },
+  "Handaxe": {
+    attr: "STR",
+    damage: "1d6",
+    damageType: "Slashing",
+  },
+  "Javelin": {
+    attr: "STR",
+    damage: "1d6",
+    damageType: "Piercing",
+  },
+  "Longbow": {
+    attr: "DEX",
+    damage: "1d8",
+    damageType: "Piercing",
+  },
+  "Longsword": {
+    attr: "STR",
+    damage: "1d8",
+    damageType: "Slashing",
+  },
+  "Mace": {
+    attr: "STR",
+    damage: "1d6",
+    damageType: "Bludgeoning",
+  },
+  "Quarterstaff": {
+    attr: "STR",
+    damage: "1d6",
+    damageType: "Bludgeoning",
+  },
+  "Scimitar": {
+    attr: "DEX",
+    damage: "1d6",
+    damageType: "Slashing",
+  },
+  "Shortbow": {
+    attr: "DEX",
+    damage: "1d6",
+    damageType: "Piercing",
+  },
+  "Shortsword": {
+    attr: "DEX",
+    damage: "1d6",
+    damageType: "Piercing",
+  },
+  "Sickle": {
+    attr: "STR",
+    damage: "1d4",
+    damageType: "Slashing",
+  },
+  "Spear": {
+    attr: "STR",
+    damage: "1d6",
+    damageType: "Piercing",
+  },
+  "Unarmed Strike": {
+    attr: "DEX",
+    damage: "1d6",
+    damageType: "Bludgeoning",
+  },
+  "Rage": {
+    desc: "While raging, your attacks deal an extra +2 damage to their target."
+  },
+  "Sneak Attack": {
+    desc: "1d6 to first attack roll of the round that has advantage and hits."
+  },
+
+  // Bard spell attacks
+  "Vicious Mockery": {
+    save: "WIS",
+    damage: "1d6",
+    damageType: "Psychic"
+  },
+  "Color Spray": {
+    save: "CON",
+    damage: "Blinded",
+    damageType: "until the end of your next turn"
+  },
+  "Dissonant Whispers": {
+    save: "WIS",
+    damage: "3d6",
+    damageType: "Psychic"
+  },
+
+  // Cleric spell attacks
+  "Sacred Flame": {
+    save: "DEX",
+    damage: "1d8",
+    damageType: "Radiant"
+  },
+  "Guiding Bolt": {
+    attr: "WIS",
+    damage: "4d6",
+    damageType: "Radiant"
+  },
+  "Thunderwave": {
+    save: "CON",
+    damage: "2d8",
+    damageType: "Thunder"
+  },
+
+  // Paladin spell attacks
+  "Word of Radiance": {
+    save: "CON",
+    damage: "1d6",
+    damageType: "Radiant"
+  },
+  "Divine Smite": {
+    attr: "CHA",
+    damage: "2d8",
+    damageType: "Radiant",
+    notes: "Bonus action; adds damage to a weapon attack.<br>The damage increases by 1d8 if the target is a Fiend or an Undead."
+  },
+
+  // Ranger spell attacks
+  "Hail of Thorns": {
+    save: "DEX",
+    damage: "1d10",
+    damageType: "Piercing",
+    notes: "This spell is cast to do extra damage with your Longbow."
+  },
+  "Hunter’s Mark": {
+    desc: `You magically mark one creature you can see within range as your quarry. Until the spell ends, you deal an extra 1d6 Force damage to the target whenever you hit it with an attack roll.`
+  },
+
+  // Sorcerer spell attacks
+  "Shocking Grasp": {
+    attr: "CHA",
+    damage: "1d8",
+    damageType: "Lightning, target can't make opportunity attacks until its next turn",
+  },
+  "Sorcerous Burst": {
+    attr: "CHA",
+    damage: "1d8",
+    damageType: "[Choose: Acid, Cold, Fire, Lightning, Poison, Psychic, or Thunder]",
+  },
+  "Burning Hands": {
+    save: "DEX",
+    damage: "3d6",
+    damageType: "Fire"
+  },
+
+  // Warlock spell attacks
+  "Eldritch Blast": {
+    attr: "CHA",
+    damage: "1d10",
+    damageType: "Force"
+  },
+  "Hex": {
+    desc: `You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 Necrotic damage to the target whenever you hit it with an attack roll. Also, choose one ability when you cast the spell. The target has Disadvantage on ability checks made with the chosen ability.`
+  },
+  "Witch Bolt": {
+    attr: "CHA",
+    damage: "2d12",
+    damageType: "Lightning",
+    notes: `On each of your subsequent turns, you can take a Bonus Action to deal 1d12 Lightning damage to the target automatically, even if the first attack missed`
+  },
+
+  // Wizard spell attacks
+  "Ray of Frost": {
+    attr: "INT",
+    damage: "1d8",
+    damageType: "Cold <br/>(Target's Speed is reduced by 10 feet until your next turn)",
+  },
+  "Magic Missile": {
+    save: "None",
+    damage: "3x 1d4+1",
+    damageType: "Force"
+  },
+  "Sleep": {
+    save: "WIS",
+    damage: "Incapacitated until the end of its next turn, at which point it must repeat the save.",
+    damageType: ""
+  },
+  "Thunderwave": {
+    save: "CON",
+    damage: "2d8",
+    damageType: "Thunder"
+  },
+
+};
+
+const SPELLSAVE_BY_CLASS = {
+  "Bard": "CHA",
+  "Cleric": "WIS",
+  "Druid": "WIS",
+  "Paladin": "CHA",
+  "Ranger": "WIS",
+  "Sorcerer": "CHA",
+  "Warlock": "CHA",
+  "Wizard": "INT",
+};
+
+const CORE_SKILLS = [
+  "Athletics",
+  "Acrobatics",
+  "Sleight of Hand",
+  "Stealth",
+  "Arcana",
+  "History",
+  "Investigation",
+  "Nature",
+  "Religion",
+  "Animal Handling",
+  "Insight",
+  "Medicine",
+  "Perception",
+  "Survival",
+  "Deception",
+  "Intimidation",
+  "Performance",
+  "Persuasion",
+];
+
+const MODS_BY_BACKGROUND = {
+  "Acolyte": {
+    feat: "Magic Initiate (Cleric)",
+    attrs: ["INT", "WIS", "CHA"],
+    skills: ["Insight", "Religion"],
+    tool: "Calligrapher's Supplies",
+    equipment: [
+      "Calligrapher's Supplies",
+      "Prayer Book",
+      "Holy Symbol",
+      "Parchment (10 sheets)",
+      "Robe"
+    ],
+    gold: 8
+  },
+  "Artisan": {
+    feat: "Crafter",
+    attrs: ["STR", "DEX", "INT"],
+    skills: ["Investigation", "Persuasion"],
+    tool: [1, ARTISANS_TOOLS],
+    equipment: [
+      "[tool]",
+      "2 Pouches",
+      "Traveler's Clothes",
+    ],
+    gold: 32
+  },
+  "Charlatan": {
+    feat: "Skilled",
+    attrs: ["DEX", "CON", "CHA"],
+    skills: ["Deception", "Sleight of Hand"],
+    tool: "Forgery Kit",
+    equipment: [
+      "Forgery Kit",
+      "Costume",
+      "Fine Clothes",
+    ],
+    gold: 15
+  },
+  "Criminal": {
+    feat: "Alert",
+    attrs: ["DEX", "CON", "INT"],
+    skills: ["Stealth", "Sleight of Hand"],
+    tool: "Thieves' Tools",
+    equipment: [
+      "2 Daggers",
+      "Thieves' Tools",
+      "Crowbar",
+      "2 Pouches",
+      "Traveler's Clothes",
+    ],
+    gold: 16
+  },
+  "Entertainer": {
+    feat: "Musician",
+    attrs: ["STR", "DEX", "CHA"],
+    skills: ["Acrobatics", "Performance"],
+    tool: [1, MUSICAL_INSTRUMENTS],
+    equipment: [
+      "[tool]",
+      "2 Costumes",
+      "Mirror",
+      "Perfume",
+      "Traveler's Clothes",
+    ],
+    gold: 11
+  },
+  "Farmer": {
+    feat: "Tough",
+    attrs: ["STR", "CON", "WIS"],
+    skills: ["Animal Handling", "Nature"],
+    tool: "Carpenter's Tools",
+    equipment: [
+      "Sickle",
+      "Carpenter's Tools",
+      "Healer's Kit",
+      "Iron Pot",
+      "Shovel",
+      "Traveler's Clothes",
+    ],
+    gold: 30
+  },
+  "Guard": {
+    feat: "Alert",
+    attrs: ["STR", "INT", "WIS"],
+    skills: ["Athletics", "Perception"],
+    tool: [1, GAMING_SETS],
+    equipment: [
+      "Spear",
+      "Light Crossbow (20 Bolts)",
+      "[tool]",
+      "Hooded Lantern",
+      "Manacles",
+      "Quiver",
+      "Traveler's Clothes",
+    ],
+    gold: 12
+  },
+  "Guide": {
+    feat: "Magic Initiate (Druid)",
+    attrs: ["DEX", "CON", "WIS"],
+    skills: ["Stealth", "Survival"],
+    tool: "Cartographer's Tools",
+    equipment: [
+      "Shortbow (20 Arrows)",
+      "Cartographer's Tools",
+      "Bedroll",
+      "Quiver",
+      "Tent",
+      "Traveler's Clothes",
+    ],
+    gold: 3
+  },
+  "Hermit": {
+    feat: "Healer",
+    attrs: ["CON", "WIS", "CHA"],
+    skills: ["Medicine", "Religion"],
+    tool: "Herbalism Kit",
+    equipment: [
+      "Quarterstaff", "Herbalism Kit", "Bedroll", "Book (philosophy)", "Lamp", "Oil (3 flasks)", "Traveler's Clothes"
+    ],
+    gold: 16
+  },
+  "Merchant": {
+    feat: "Lucky",
+    attrs: ["CON", "INT", "CHA"],
+    skills: ["Animal Handling", "Persuasion"],
+    tool: "Navigator's Tools",
+    equipment: [
+      "Navigator's Tools", "2 Pouches", "Traveler's Clothes"
+    ],
+    gold: 22
+  },
+  "Noble": {
+    feat: "Skilled",
+    attrs: ["STR", "INT", "CHA"],
+    skills: ["History", "Persuasion"],
+    tool: [1, GAMING_SETS],
+    equipment: [
+      "[tool]", "Fine Clothes", "Perfume"
+    ],
+    gold: 29
+  },
+  "Sage": {
+    feat: "Magic Initiate (Wizard)",
+    attrs: ["CON", "INT", "WIS"],
+    skills: ["Arcana", "History"],
+    tool: "Calligrapher's Supplies",
+    equipment: [
+      "Quarterstaff", "Calligrapher's Supplies", "Book (history)", "Parchment (8 sheets)", "Robe"
+    ],
+    gold: 8
+  },
+  "Sailor": {
+    feat: "Tavern Brawler",
+    attrs: ["STR", "DEX", "WIS"],
+    skills: ["Acrobatics", "Perception"],
+    tool: "Navigator's Tools",
+    equipment: [
+      "Dagger", "Navigator's Tools", "Rope", "Traveler's Clothes"
+    ],
+    gold: 20
+  },
+  "Scribe": {
+    feat: "Skilled",
+    attrs: ["DEX", "INT", "WIS"],
+    skills: ["Investigation", "Perception"],
+    tool: "Calligrapher's Supplies",
+    equipment: [
+      "Calligrapher's Supplies", "Fine Clothes", "Lamp", "Oil (3 flasks)", "Parchment (12 sheets)"
+    ],
+    gold: 23
+  },
+  "Soldier": {
+    feat: "Savage Attacker",
+    attrs: ["STR", "DEX", "CON"],
+    skills: ["Athletics", "Intimidation"],
+    tool: [1, GAMING_SETS],
+    equipment: [
+      "Spear", "Shortbow (20 Arrows)", "[tool]", "Healer's Kit", "Quiver", "Traveler's Clothes"
+    ],
+    gold: 14
+  },
+  "Wayfarer": {
+    feat: "Lucky",
+    attrs: ["DEX", "WIS", "CHA"],
+    skills: ["Insight", "Stealth"],
+    tool: "Thieves' Tools",
+    equipment: [
+      "2 Daggers", "Thieves' Tools", oneOf(GAMING_SETS), "Bedroll", "2 Pouches", "Traveler's Clothes"
+    ],
+    gold: 16
+  },
+};
+
+const generateOriginFeat = (featName) => {
+  return `${featName}: ${ORIGIN_FEATS[featName]}`;
+}
+
+const getModsForBackground = (backgroundName) => {
+  const mods = {
+    ...MODS_BY_BACKGROUND[backgroundName]
+  };
+  if (Array.isArray(mods.tool)) {
+    mods.tool = oneOf(mods.tool[1]);
+    const toolIdx = mods.equipment.indexOf("[tool]");
+    if (toolIdx > -1) {
+      mods.equipment[toolIdx] = mods.tool;
+    }
+  }
+  return mods;
+}
+
+
+const roll = (dieMax, modifier = 0) => {
+  return Math.floor(Math.random() * dieMax) + 1 + modifier
+};
+
+const sum = (numberArray) => {
+  return (numberArray ?? []).reduce((acc, val) => acc + val, 0);
+}
+
+const rollStat = () => {
+  const rolls = [
+    roll(6),
+    roll(6),
+    roll(6),
+    roll(6),
+  ];
+  return sum(rolls.toSorted().slice(1));
+};
+
+const getHP = (className, conBonus) => {
+  if (className === "Barbarian") {
+    return 12 + conBonus
+  } else if (["Fighter", "Paladin", "Ranger"].includes(className)) {
+    return 10 + conBonus;
+  } else if (["Sorcerer", "Wizard"].includes(className)) {
+    return 6 + conBonus;
+  } else {
+    return 8 + conBonus;
+  }
+};
+
+const abilityModifier = (value) => {
+  switch (value) {
+    case 1:
+      return -5;
+    case 2:
+    case 3:
+      return -4;
+    case 4:
+    case 5:
+      return -3;
+    case 6:
+    case 7:
+      return -2;
+    case 8:
+    case 9:
+      return -1;
+    case 10:
+    case 11:
+      return 0;
+    case 12:
+    case 13:
+      return 1;
+    case 14:
+    case 15:
+      return 2;
+    case 16:
+    case 17:
+      return 3;
+    case 18:
+    case 19:
+      return 4;
+    case 20:
+    case 21:
+      return 5;
+    default:
+      // in theory a level 1 PC is never going to have an attr any higher than 20
+      return 0;
+  }
+};
+
+const statModStr = (bonus) => {
+  return `${bonus >= 0 ? '+' : ''}${bonus}`;
+};
+
+const ABILITY_MOD_FOR_SKILL = {
+  // core skills
+  "Athletics": "STR",
+  "Acrobatics": "DEX",
+  "Sleight of Hand": "DEX",
+  "Stealth": "DEX",
+  "Arcana": "INT",
+  "History": "INT",
+  "Investigation": "INT",
+  "Nature": "INT",
+  "Religion": "INT",
+  "Animal Handling": "WIS",
+  "Insight": "WIS",
+  "Medicine": "WIS",
+  "Perception": "WIS",
+  "Survival": "WIS",
+  "Deception": "CHA",
+  "Intimidation": "CHA",
+  "Performance": "CHA",
+  "Persuasion": "CHA",
+
+  // tools
+  "Alchemist's Supplies": "INT",
+  "Brewer's Supplies": "INT",
+  "Calligrapher's Supplies": "DEX",
+  "Carpenter's Tools": "STR",
+  "Cartographer's Tools": "WIS",
+  "Cobbler's Tools": "DEX",
+  "Cook's Utensils": "WIS",
+  'Disguise Kit': "CHA",
+  'Forgery Kit': "DEX",
+  "Glassblower's Tools": "INT",
+  'Herbalism Kit': "INT",
+  "Jeweler's Tools": "INT",
+  "Leatherworker's Tools": "DEX",
+  "Mason's Tools": "STR",
+  "Navigator's Tools": "WIS",
+  "Painter's Supplies": "WIS",
+  "Poisoner's Kit": "INT",
+  "Potter's Tools": "INT",
+  "Smith's Tools": "STR",
+  "Tinker's Tools": "DEX",
+  "Thieves' Tools": "DEX",
+  "Weaver's Tools": "DEX",
+  "Woodcarver's Tools": "DEX",
+
+  // gaming sets
+  "Dice": "WIS",
+  "Dragonchess": "WIS",
+  "Playing cards": "WIS",
+  "Three-dragon ante": "WIS",
+
+  // musical instruments
+  "Bagpipes": "CHA",
+  "Drum": "CHA",
+  "Dulcimer": "CHA",
+  "Flute": "CHA",
+  "Horn": "CHA",
+  "Lute": "CHA",
+  "Lyre": "CHA",
+  "Pan Flute": "CHA",
+  "Shawm": "CHA",
+  "Viol": "CHA",
+};
+
+const getSkillBonus = (skillName, bonuses, proficiencies, hasExpertise = false) => {
+  const attr = ABILITY_MOD_FOR_SKILL[skillName];
+  const bonus = hasExpertise ? 4 : proficiencies.includes(skillName) ? 2 : 0;
+  if (attr) {
+    return bonuses[attr] + bonus;
+  }
+  return 0;
+}
+
+const AttrGrid = (PC) => {
+  const { attrs, bonuses, skills: rawSkills, className, proficiencies } = PC;
+  const saves = {
+    ...bonuses
+  };
+  MODS_BY_CLASS[className].saves.forEach(attr => {
+    saves[attr] += 2;
+  });
+  const skills = {
+    ...rawSkills
+  };
+
+  return jsx`<div class="stats">
+    <div class="stat">
+      <strong>STR</strong>
+      <span>${attrs.STR} (${statModStr(bonuses.STR)})</span>
+      <hr>
+      <span>${statModStr(saves.STR)} save</span>
+      <hr>
+      <span class="ability">${statModStr(getSkillBonus("Athletics", bonuses, proficiencies))} Athletics</span>
+    </div>
+    <div class="stat">
+      <strong>DEX</strong>
+      <span>${attrs.DEX} (${statModStr(bonuses.DEX)})</span>
+      <hr>
+      <span>${statModStr(saves.DEX)} save</span>
+      <hr>
+      <span class="ability">${statModStr(getSkillBonus("Acrobatics", bonuses, proficiencies))} Acrobatics</span>
+      <span class="ability">${statModStr(getSkillBonus("Sleight of Hand", bonuses, proficiencies, className === "Rogue"))} Sleight of Hand</span>
+      <span class="ability">${statModStr(getSkillBonus("Stealth", bonuses, proficiencies, className === "Rogue"))} Stealth</span>
+    </div>
+    <div class="stat">
+      <strong>CON</strong>
+      <span>${attrs.CON} (${statModStr(bonuses.CON)})</span>
+      <hr>
+      <span>${statModStr(saves.CON)} save</span>
+    </div>
+    <div class="stat">
+      <strong>INT</strong>
+      <span>${attrs.INT} (${statModStr(bonuses.INT)})</span>
+      <hr>
+      <span>${statModStr(saves.INT)} save</span>
+      <hr>
+      <span class="ability">${statModStr(getSkillBonus("Arcana", bonuses, proficiencies))} Arcana</span>
+      <span class="ability">${statModStr(getSkillBonus("History", bonuses, proficiencies))} History</span>
+      <span class="ability">${statModStr(getSkillBonus("Investigation", bonuses, proficiencies))} Investigation</span>
+      <span class="ability">${statModStr(getSkillBonus("Nature", bonuses, proficiencies))} Nature</span>
+      <span class="ability">${statModStr(getSkillBonus("Religion", bonuses, proficiencies))} Religion</span>
+    </div>
+    <div class="stat">
+      <strong>WIS</strong>
+      <span>${attrs.WIS} (${statModStr(bonuses.WIS)})</span>
+      <hr>
+      <span>${statModStr(saves.WIS)} save</span>
+      <hr>
+      <span class="ability">${statModStr(getSkillBonus("Animal Handling", bonuses, proficiencies))} Animal Handling</span>
+      <span class="ability">${statModStr(getSkillBonus("Insight", bonuses, proficiencies))} Insight</span>
+      <span class="ability">${statModStr(getSkillBonus("Medicine", bonuses, proficiencies))} Medicine</span>
+      <span class="ability">${statModStr(getSkillBonus("Perception", bonuses, proficiencies))} Perception</span>
+      <span class="ability">${statModStr(getSkillBonus("Survival", bonuses, proficiencies))} Survival</span>
+    </div>
+    <div class="stat">
+      <strong>CHA</strong>
+      <span>${attrs.CHA} (${statModStr(bonuses.CHA)})</span>
+      <hr>
+      <span>${statModStr(saves.CHA)} save</span>
+      <hr>
+      <span class="ability">${statModStr(getSkillBonus("Deception", bonuses, proficiencies))} Deception</span>
+      <span class="ability">${statModStr(getSkillBonus("Intimidation", bonuses, proficiencies))} Intimidation</span>
+      <span class="ability">${statModStr(getSkillBonus("Performance", bonuses, proficiencies))} Performance</span>
+      <span class="ability">${statModStr(getSkillBonus("Persuasion", bonuses, proficiencies))} Persuasion</span>
+    </div>
+  </div>`;
+}
+
+const CharacterSheet = (PC) => {
+  const specialSkills = [];
+  for (let skillName of PC.proficiencies) {
+    if (!CORE_SKILLS.includes(skillName)) {
+      specialSkills.push(skillName);
+    }
+  }
+  return jsx`
+  <header class="identity">
+    <div>
+      <h3>${PC.name}, ${PC.species} ${PC.className}</h3>
+      <h4>Background: ${PC.origin}</h4>
+    </div>
+
+    <table border="1">
+      <thead>
+        <tr>
+          <th>AC</th>
+          <th>HP</th>
+          <th>Initiative</th>
+          <th>Speed</th>
+          <th>Size</th>
+          <th>Passive Perception</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>${PC.AC}</td>
+          <td>${PC.HP}</td>
+          <td>${statModStr(PC.initiative)}</td>
+          <td>${PC.speed}</td>
+          <td>${PC.size}</td>
+          <td>${abilityModifier(PC.attrs.WIS) + 10}</td>
+        </tr>
+      </tbody>
+    </table>
+  </header>
+
+  ${AttrGrid(PC)}
+
+  <div class="attacks">
+    <h4>Attacks</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Atk Bonus / DC</th>
+          <th>Damage / Effect</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${PC.attacks.map(atk => {
+          let entry = "";
+          if (atk.desc) {
+            entry = jsx`<tr><td colspan="3">${atk.name}: ${atk.desc}</td></tr>`;
+          } else if (atk.save) {
+            let save = atk.save === "None" ? "None" : `${atk.save} save (DC ${PC.bonuses.spellSave})`;
+            entry = jsx`<tr>
+              <td>${atk.name}</td>
+              <td>${save}</td>
+              <td>${atk.damage} ${atk.damageType}</td>
+            </tr>`;
+          } else {
+            const bonus = PC.bonuses[atk.attr];
+            const dmg = `${atk.damage}${statModStr(bonus)}`;
+            entry = jsx`<tr>
+              <td>${atk.name}</td>
+              <td>${statModStr(bonus+2)}</td>
+              <td>${dmg} ${atk.damageType}</td>
+            </tr>`;
+          }
+          if (atk.notes) {
+            entry += `<tr><td colspan="3">(${atk.notes})</td></tr>`;
+          }
+          return entry;
+        })}
+      </tbody>
+    </table>
+  </div>
+  <div class="features">
+    <h4>Special abilities, class features, &amp; spells</h4>
+    <ul>
+      ${specialSkills.map(skill => `<li>${skill} (${ABILITY_MOD_FOR_SKILL[skill]}, ${statModStr(getSkillBonus(skill, PC.bonuses, PC.proficiencies))} total)</li>`)}
+      ${PC.features.map(feature => {
+        if (feature.desc) {
+          return `<details><summary>${feature.name}:</summary><div>${feature.desc}</div></details>`;
+        } 
+        return `<li>${feature}</li>`;
+      })}
+    </ul>
+    ${PC.spells?.length > 0 && jsx`
+      <ul><strong>Spells:</strong>
+        ${PC.spells.map(spell => `<li>${spell}</li>`)}
+      </ul>
+    `}
+  </div>
+  <div class="equipment">
+    <h4>Equipment</h4>
+    <ul>
+      ${PC.equipment.map(eq => `<li>${eq}</li>`)}
+    </ul>
+  </div>`;
+}
+
+const PC_by_4d6 = () => {
+  const attrs = {
+    STR: rollStat(),
+    DEX: rollStat(),
+    CON: rollStat(),
+    INT: rollStat(),
+    WIS: rollStat(),
+    CHA: rollStat(),
+  };
+  const sortedAttrs = Object.entries(attrs).toSorted((a, b) => b[1] - a[1]);
+  const bestAttr = sortedAttrs[0][0];
+  const className = oneOf(CLASSES_BY_BEST_ATTR[bestAttr]);
+  return {
+    attrs,
+    className
+  };
+}
+
+const PC_by_StatArray = (classOverride) => {
+  const className = classOverride || oneOf(BASE_CLASSES);
+  const statArray = STAT_ARRAY_BY_CLASS[className];
+  const attrs = Object.fromEntries(ATTRS.map((attr, idx) => {
+    return [attr, statArray[idx]]
+  }));
+  
+  return {
+    attrs,
+    className
+  };
+}
+
+const newPC = ({ classOverride = "", oldSchool = false }) => {
+  const species = oneOf(BASE_SPECIES);
+  const name = `${oneOf(FIRST_NAMES_BY_SPECIES[species])} ${oneOf(LAST_NAMES_BY_SPECIES[species])}`.trim();
+
+  const core = oldSchool ? PC_by_4d6() : PC_by_StatArray(classOverride);
+  const className = classOverride || core.className;
+  const attrs = core.attrs;
+
+  const bonuses = {
+    STR: abilityModifier(attrs.STR),
+    DEX: abilityModifier(attrs.DEX),
+    CON: abilityModifier(attrs.CON),
+    INT: abilityModifier(attrs.INT),
+    WIS: abilityModifier(attrs.WIS),
+    CHA: abilityModifier(attrs.CHA),
+  };
+  if (SPELLSAVE_BY_CLASS[className]) {
+    bonuses.spellSave = 10 + bonuses[SPELLSAVE_BY_CLASS[className]];
+  }
+  const origin = oneOf(BACKGROUNDS_BY_CLASS[className]);
+
+  const originMods = getModsForBackground(origin);
+  const classMods = MODS_BY_CLASS[className];
+
+  for (let attr of originMods.attrs) {
+    attrs[attr] += 1;
+  }
+
+  const skills = {
+    "Athletics": bonuses.STR,
+    "Acrobatics": bonuses.DEX,
+    "Sleight of Hand": bonuses.DEX,
+    "Stealth": bonuses.DEX,
+    "Arcana": bonuses.INT,
+    "History": bonuses.INT,
+    "Investigation": bonuses.INT,
+    "Nature": bonuses.INT,
+    "Religion": bonuses.INT,
+    "AnimalHandling": bonuses.WIS,
+    "Insight": bonuses.WIS,
+    "Medicine": bonuses.WIS,
+    "Perception": bonuses.WIS,
+    "Survival": bonuses.WIS,
+    "Deception": bonuses.CHA,
+    "Intimidation": bonuses.CHA,
+    "Performance": bonuses.CHA,
+    "Persuasion": bonuses.CHA,
+  };
+
+  let HP = getHP(className, bonuses.CON);
+  let initiative = bonuses.DEX;
+  const speed = 30;
+  const size = SMALL_SPECIES.includes(species) ? "Small" : "Medium";
+  const attacks = ATTACKS_BY_CLASS[className].map(name => {
+    return {
+      name,
+      ...ATTACKS[name]
+    };
+  });
+
+  let proficiencies = new Set([
+    ...classMods.skills,
+    ...originMods.skills,
+    originMods.tool,
+  ]);
+  const spells = classMods.spells ? [...classMods.spells] : [];
+
+  // apply any modifications from the origin feat
+  switch (originMods.feat) {
+    case "Alert":
+      // "Add your Proficiency Bonus when you roll Initiative.
+      initiative += 2;
+      break;
+    case "Crafter":
+      // "Gain proficiency with three different sets of Artisan’s Tools.
+      pickNMore(ARTISANS_TOOLS, 3, proficiencies);
+      break;
+    case "Magic Initiate (Cleric)":
+      // "You gain two cantrips and one level 1 spell from the Cleric spell list.",
+      bonuses.spellSave = 10 + bonuses.WIS;
+      spells.unshift(...[
+        "Mending (lvl 0)",
+        "Resistance (lvl 0)",
+      ]);
+      spells.push("Detect Magic (lvl 1)");
+      break;
+    case "Magic Initiate (Druid)":
+      // "You gain two cantrips and one level 1 spell from the Druid spell list.",
+      bonuses.spellSave = 10 + bonuses.WIS;
+      spells.unshift(...[
+        "Mending (lvl 0)",
+        "Message (lvl 0)",
+      ])
+      spells.push("Longstrider (lvl 1)");
+      break;
+    case "Magic Initiate (Wizard)":
+      // "You gain two cantrips and one level 1 spell from the Wizard spell list.",
+      bonuses.spellSave = 10 + bonuses.INT;
+      // todo: pick extra wizard spells
+      // spells.unshift(...[
+      //   "--- (lvl 0)",
+      //   "--- (lvl 0)",
+      // ])
+      // spells.push("--- (lvl 1)");
+      break;
+    case "Musician":
+      // "You gain proficiency with three musical instruments of your choice."
+      pickNMore(MUSICAL_INSTRUMENTS, 3, proficiencies);
+      break;
+    case "Skilled":
+      // "You gain proficiency in any combination of three skills or tools of your choice.",
+      // TODO
+      break;
+    case "Tavern Brawler":
+      // (only apply if class is not Monk, since Monk's unarmed strike is better)
+      if (className !== "Monk") {
+        attacks.push({
+          name: "Unarmed Strike",
+          attr: "STR",
+          damage: "1d4",
+          damageType: "Bludgeoning"
+        });
+      }
+      break;
+    case "Tough":
+      // "When you first gain this Origin feat, your Hit Point maximum increases by twice your character level."
+      HP += 2;
+      break;
+  }
+
+  // Rogue expertise
+  if (className === "Rogue") {
+    // double-proficiency with Sleight of Hand and Stealth 
+    skills["Sleight of Hand"] += 2;
+    skills["Stealth"] += 2;
+  }
+
+  const equipment = [
+    ...classMods.equipment,
+    ...originMods.equipment,
+    `${classMods.gold+originMods.gold} GP`
+  ];
+
+  // Armor class
+  let AC = 10 + bonuses.DEX;
+  if (className === "Monk") {
+    AC += bonuses.WIS;
+  } else if (className === "Barbarian") {
+    AC += bonuses.CON;
+  }
+
+  // add any armor to AC
+  equipment.forEach(eq => {
+    if (LIGHT_ARMOR[eq]) {
+      AC = LIGHT_ARMOR[eq] + bonuses.DEX;
+    }
+    if (MEDIUM_ARMOR[eq]) {
+      AC = MEDIUM_ARMOR[eq] + (bonuses.DEX > 2 ? 2 : bonuses.DEX);
+    }
+    if (HEAVY_ARMOR[eq]) {
+      AC = HEAVY_ARMOR[eq];
+    }
+    if (eq === "Shield") {
+      AC += 2;
+    }
+  });
+
+  // apply any post-armor AC adjustments
+  if (className === "Fighter") {
+    // Defense fighting sytle
+    AC += 1;
+  }
+
+  const features = [
+    ...classMods.features,
+    generateOriginFeat(originMods.feat),
+  ];
+
+  const pcData = {
+    name,
+    species,
+    className,
+    origin,
+    HP,
+    AC,
+    initiative,
+    speed,
+    size,
+    attrs,
+    bonuses,
+    skills,
+    proficiencies: Array.from(proficiencies),
+    attacks,
+    features,
+    spells,
+    equipment,
+  };
+  localStorage.setItem("savedPC", JSON.stringify(pcData));
+  return pcData;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btnAnother = document.querySelector("button#btnGenerate");
+  const classSelector = document.querySelector("select#class");
+  const main = document.querySelector("main");
+  let classOverride = "";
+
+  const saved = localStorage.getItem("savedPC");
+  let pcData = saved ? JSON.parse(saved) : newPC({ classOverride });
+
+  btnAnother.addEventListener("click", () => {
+    pcData = newPC({ classOverride });
+    main.innerHTML = CharacterSheet(pcData);
+  });
+
+  classSelector.addEventListener("change", evt => {
+    classOverride = evt.target.value;
+    pcData = newPC({ classOverride });
+    main.innerHTML = CharacterSheet(pcData);
+  })
+
+  main.innerHTML = CharacterSheet(pcData);
+});

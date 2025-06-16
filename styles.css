@@ -1,0 +1,288 @@
+/* global styles */
+
+:root {
+  /* Chrome-only for now but this will allow smooth size transitions */
+  interpolate-size: allow-keywords;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+h1 {
+  font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+  font-size: 28px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 800;
+  line-height: 28px;
+}
+
+h3 {
+  font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+  font-size: 17px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 700;
+  line-height: 23px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* end global styles */
+
+body {
+  margin: 0;
+  padding: 0;
+
+  /* hide burger menu off to the left of the viewport */
+  overflow-x: hidden;
+
+  font-family: "Avenir Next", "Avenir", sans-serif;
+
+  &>footer {
+    text-align: center;
+    border-top: 1px groove #323232;
+    color: #323232;
+    display: block;
+    width: 100vw;
+    padding: 1em;
+
+    a[href] {
+      color: #a0a0fe;
+    }
+  }
+}
+
+header {
+  display: flex;
+  width: 100%;
+  width: -webkit-fill-available;
+
+  img {
+    margin: 0 1rem;
+  }
+
+  h1 {
+    margin: auto;
+  }
+
+  &.topBar {
+    position: fixed;
+    box-shadow: 0px 5px 3px 0px rgba(0, 0, 0, 0.2);
+    padding: 0 5px;
+    z-index: 5;  
+  }
+
+  &.advanced {
+    border-bottom: 1px solid;
+    padding: 0.75em;
+  }
+
+  &.identity {
+    flex-wrap: wrap;
+
+    table {
+      margin-left: auto;
+      margin-right: 2px;
+    }
+  }
+}
+
+/* grid paper background effect */
+.gridPaper {
+  background-color: #DDDDE0;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  /* box-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.3); */
+  background-color: #fffffe;
+  background-image: linear-gradient(#ddd 2px, transparent 2px), linear-gradient(90deg, #ddd 2px, transparent 2px), linear-gradient(rgba(127, 127, 127, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(127, 127, 127, 0.2) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+  background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+}
+
+/* util classes */
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-centered {
+  align-items: center;
+  justify-content: center;
+}
+
+main {
+  min-height: calc(100vh - 8rem);
+  width: 100vw;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 0.5em;
+
+  background: white;
+  color: black;
+}
+
+button {
+  border: 2px solid #323232;
+  border-radius: 5px;
+  font-size: 1em;
+  padding: 0.75em;
+}
+
+.topSpacer {
+  padding-top: 4.25em;
+  width: 100vw;
+}
+
+main {
+  h3,
+  h4 {
+    margin: 0;
+  }
+}
+
+footer {
+  box-shadow: 0px -5px 3px 0px rgba(0, 0, 0, 0.2);
+}
+
+.stats {
+  font-size: small;
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+
+  .stat {
+    border: 1px solid black;
+    border-radius: 1em;
+    min-width: 5rem;
+    align-content: center;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 5px;
+    flex: 1 0 auto;
+    overflow: auto;
+
+    strong {
+      background-color: black;
+      color: white;
+      margin-bottom: 5px;
+      padding: 5px 0;
+    }
+
+    span.ability {
+      text-align: left;
+      /* word-break: break-all; */
+      margin: 0 5px;
+    }
+
+    hr {
+      width: 100%;
+    }
+  }
+}
+
+table {
+  td {
+    padding: 0 0.5em;
+    text-align: center;
+  }
+}
+
+.attacks,
+.features,
+.equipment {
+  border: 1px solid black;
+
+  table {
+    margin: 0 auto;
+  }
+
+  h4 {
+    background-color: black;
+    color: white;
+    text-align: center;
+  }
+
+  ul {
+    padding: 0 2rem;
+
+    details {
+      margin-left: -1rem;
+
+      div {
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+}
+.features {
+  columns: 2;
+}
+.equipment {
+  columns: 5;
+}
+
+/* responsive styles */
+@media (max-width: 750px) {
+  .features {
+    columns: 1;
+  }
+  .equipment {
+    columns: 2;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    grid-column-gap: 5px;
+    grid-row-gap: 5px;
+  }
+}
+
+@media (min-width: 751px) and (max-width: 1200px) {
+  .equipment {
+    columns: 4;
+  }
+}
+
+/* print mode */
+@media print {
+  /* All your print styles go here */
+  header.topBar,
+  header.advanced,
+  footer,
+  .topSpacer,
+  nav {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1201px) {
+  main {
+    width: 1200px;
+    margin: 0 auto;
+  }
+  header {
+    width: 100%;
+    width: -webkit-fill-available;
+  }
+}

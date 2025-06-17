@@ -1,5 +1,7 @@
 import { jsx } from "./src/domUtils.js";
 
+const RE_SPELL_LEVEL = /.* \(lvl (\d+)\)/;
+
 const oneOf = (array) => {
   const idx = Math.floor(Math.random() * array.length);
   return array[idx] ?? "";
@@ -47,7 +49,7 @@ const STAT_ARRAY_BY_CLASS = {
   "Barbarian": [15, 13, 14, 10, 12, 8],
   "Bard": [8, 14, 12, 13, 10, 15],
   "Cleric": [14, 8, 13, 10, 15, 12],
-  "Druid": [8, 12, 14, 13, 15, 10],
+  "Druid": [10, 12, 14, 13, 15, 8], // switched dump stat from STR to CHA so attacks are not so awful
   "Fighter": [15, 14, 13, 8, 10, 12],
   "Monk": [12, 15, 13, 10, 14, 8],
   "Paladin": [15, 10, 13, 8, 12, 14],
@@ -1634,6 +1636,11 @@ const newPC = ({ classOverride = "", oldSchool = false }) => {
   const className = classOverride || core.className;
   const attrs = core.attrs;
 
+  const origin = oneOf(BACKGROUNDS_BY_CLASS[className]);
+  const originMods = getModsForBackground(origin);
+  for (let attr of originMods.attrs) {
+    attrs[attr] += 1;
+  }
   const bonuses = {
     STR: abilityModifier(attrs.STR),
     DEX: abilityModifier(attrs.DEX),
@@ -1645,15 +1652,10 @@ const newPC = ({ classOverride = "", oldSchool = false }) => {
   if (SPELLSAVE_BY_CLASS[className]) {
     bonuses.spellSave = 10 + bonuses[SPELLSAVE_BY_CLASS[className]];
   }
-  const origin = oneOf(BACKGROUNDS_BY_CLASS[className]);
 
   const speciesMods = getSpeciesMods(species, bonuses); // spells / features / attacks / skills
-  const originMods = getModsForBackground(origin);
   const classMods = MODS_BY_CLASS[className];
 
-  for (let attr of originMods.attrs) {
-    attrs[attr] += 1;
-  }
 
   const skills = {
     "Athletics": bonuses.STR,
@@ -1822,6 +1824,11 @@ const newPC = ({ classOverride = "", oldSchool = false }) => {
     ...classMods.features,
     generateOriginFeat(originMods.feat),
   ];
+
+  // sort spells by name, then by level
+  spells.sort().sort((a, b) => {
+    return a.replace(RE_SPELL_LEVEL, "$1") - b.replace(RE_SPELL_LEVEL, "$1");
+  });
 
   const pcData = {
     name,

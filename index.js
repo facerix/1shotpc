@@ -1628,8 +1628,8 @@ const PC_by_StatArray = (classOverride) => {
   };
 };
 
-const newPC = ({ classOverride = "", oldSchool = false }) => {
-  const species = oneOf(BASE_SPECIES);
+const newPC = ({ classOverride = "", speciesOverride="", oldSchool = false }) => {
+  const species = speciesOverride || oneOf(BASE_SPECIES);
   const name = `${oneOf(FIRST_NAMES_BY_SPECIES[species])} ${oneOf(LAST_NAMES_BY_SPECIES[species])}`.trim();
 
   const core = oldSchool ? PC_by_4d6() : PC_by_StatArray(classOverride);
@@ -1855,22 +1855,38 @@ const newPC = ({ classOverride = "", oldSchool = false }) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   const btnAnother = document.querySelector("button#btnGenerate");
+  const chkShowAdvanced = document.querySelector("input#showAdvanced");
+  const advancedHeader = document.querySelector("header.advanced");
+  const speciesSelector = document.querySelector("select#species");
   const classSelector = document.querySelector("select#class");
   const main = document.querySelector("main");
+  let speciesOverride = "";
   let classOverride = "";
 
   const saved = localStorage.getItem("savedPC");
   let pcData = saved ? JSON.parse(saved) : newPC({ classOverride });
 
-  btnAnother.addEventListener("click", () => {
-    pcData = newPC({ classOverride });
+  const regen = () => {
+    pcData = newPC({ classOverride, speciesOverride });
     main.innerHTML = CharacterSheet(pcData);
+  }
+
+  chkShowAdvanced.addEventListener("change", evt => {
+    advancedHeader.classList[evt.target.checked ? "add" : "remove"]("visible");
   });
+
+  btnAnother.addEventListener("click", () => {
+    regen();
+  });
+
+  speciesSelector.addEventListener("change", evt => {
+    speciesOverride = evt.target.value;
+    regen();
+  })
 
   classSelector.addEventListener("change", evt => {
     classOverride = evt.target.value;
-    pcData = newPC({ classOverride });
-    main.innerHTML = CharacterSheet(pcData);
+    regen();
   })
 
   main.innerHTML = CharacterSheet(pcData);

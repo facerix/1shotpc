@@ -24,10 +24,27 @@
   <header class="topBar gridPaper">
     <img src="/profile.png" alt="profile card" />
     <h1>1-Shot PC</h1>
+    <label id="advancedOptions">
+      <input id="showAdvanced" type="checkbox">    
+      <img src="/images/settings.svg" alt="options" />
+    </label>
     <button id="btnGenerate">Gimme another</button>
   </header>
-  <div class="topSpacer"></div>
-  <header class="advanced hidden">
+  <header class="advanced">
+    <h4>Customize</h4>
+    <select id="species">
+      <option value="">Random species</option>
+      <option value="Aasimar">Aasimar</option>
+      <option value="Dragonborn">Dragonborn</option>
+      <option value="Dwarf">Dwarf</option>
+      <option value="Elf">Elf</option>
+      <option value="Gnome">Gnome</option>
+      <option value="Goliath">Goliath</option>
+      <option value="Halfling">Halfling</option>
+      <option value="Human">Human</option>
+      <option value="Orc">Orc</option>
+      <option value="Tiefling">Tiefling</option>
+    </select>
     <select id="class">
       <option value="">Random class</option>
       <option value="Barbarian">Barbarian</option>

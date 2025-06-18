@@ -82,11 +82,6 @@ header {
     z-index: 5;  
   }
 
-  &.advanced {
-    border-bottom: 1px solid;
-    padding: 0.75em;
-  }
-
   &.identity {
     flex-wrap: wrap;
 
@@ -94,6 +89,40 @@ header {
       margin-left: auto;
       margin-right: 2px;
     }
+  }
+}
+
+label#advancedOptions {
+  display: flex;
+  align-items: center;
+
+  input[type=checkbox] {
+    display: none;
+  }
+  img {
+    max-height: 1.5rem;
+    margin: auto 1rem;
+  }
+}
+
+header.advanced {
+  border-bottom: 1px solid black;
+  padding: 0.75em;
+  margin-top: 1rem;
+  justify-content: center;
+  gap: 1rem;
+
+  transition: all cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s;
+
+  h4 {
+    margin: 0;
+    padding: 0 0.5rem;
+    color: white;
+    background: black;
+  }
+
+  &.visible {
+    margin-top: 4.25rem;
   }
 }
 
@@ -132,8 +161,8 @@ main {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
-  padding: 0.5em;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
 
   background: white;
   color: black;
@@ -142,13 +171,8 @@ main {
 button {
   border: 2px solid #323232;
   border-radius: 5px;
-  font-size: 1em;
-  padding: 0.75em;
-}
-
-.topSpacer {
-  padding-top: 4.25em;
-  width: 100vw;
+  font-size: 1rem;
+  padding: 0.75rem;
 }
 
 main {
@@ -245,11 +269,15 @@ table {
   flex-basis: 25%;
 }
 #features-and-spells {
-  gap: 0.5em;
+  gap: 0.5rem;
 }
 
 /* responsive styles */
 @media (max-width: 750px) {
+  header img {
+    margin: auto;
+  }
+
   .features {
     columns: 1;
     flex: 1 1 auto;

@@ -21,6 +21,13 @@
   <link rel="stylesheet" href="/styles.css" />
 
   <style>
+    header {
+      border-bottom: 1px solid black;
+      a {
+        margin: auto 1rem;
+      }
+    }
+
     main {
       flex-direction: column;
       padding: 3em 15vw;
@@ -61,9 +68,11 @@
   </style>
 </head>
 
-<body class="fill-height watermark">
+<body class="fill-height">
   <header class="gridPaper">
-    <img src="/profile.png" alt="profile card" />
+    <a href="/">
+      <img src="/profile.png" alt="back to main" />
+    </a>
     <h1>About this Site</h1>
   </header>
   <main class="credits">

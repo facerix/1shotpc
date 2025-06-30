@@ -3,6 +3,13 @@
 :root {
   /* Chrome-only for now but this will allow smooth size transitions */
   interpolate-size: allow-keywords;
+  color-scheme: light dark;
+
+  --main-bg-color: white;
+  --main-border-color: #323232;
+  
+  --dark-bg-color: black;
+  --dark-border-color: #efefef;
 }
 
 html {
@@ -42,6 +49,8 @@ h3 {
 body {
   margin: 0;
   padding: 0;
+  background-color: light-dark(var(--main-bg-color), var(--dark-bg-color));
+  color: light-dark(var(--main-border-color), var(--dark-border-color));
 
   /* hide burger menu off to the left of the viewport */
   overflow-x: hidden;
@@ -50,8 +59,8 @@ body {
 
   &>footer {
     text-align: center;
-    border-top: 1px groove #323232;
-    color: #323232;
+    border-top: 1px groove light-dark(var(--main-border-color), var(--dark-border-color));
+    color: light-dark(var(--main-border-color), var(--dark-border-color));
     display: block;
     width: 100vw;
     padding: 1em;
@@ -106,7 +115,7 @@ label#advancedOptions {
 }
 
 header.advanced {
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid light-dark(var(--dark-bg-color), var(--main-bg-color));
   padding: 0.75em;
   margin-top: 1rem;
   justify-content: center;
@@ -117,8 +126,8 @@ header.advanced {
   h4 {
     margin: 0;
     padding: 0 0.5rem;
-    color: white;
-    background: black;
+    color: light-dark(var(--main-bg-color), var(--dark-bg-color));
+    background: light-dark(var(--dark-bg-color), var(--main-bg-color));
   }
 
   &.visible {
@@ -128,13 +137,12 @@ header.advanced {
 
 /* grid paper background effect */
 .gridPaper {
-  background-color: #DDDDE0;
-  -moz-background-clip: padding;
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-  /* box-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.3); */
   background-color: #fffffe;
-  background-image: linear-gradient(#ddd 2px, transparent 2px), linear-gradient(90deg, #ddd 2px, transparent 2px), linear-gradient(rgba(127, 127, 127, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(127, 127, 127, 0.2) 1px, transparent 1px);
+  background-image: 
+    linear-gradient(#ddd 2px, transparent 2px),
+    linear-gradient(90deg, #ddd 2px, transparent 2px),
+    linear-gradient(rgba(127, 127, 127, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(127, 127, 127, 0.2) 1px, transparent 1px);
   background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
   background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
 }
@@ -163,13 +171,12 @@ main {
   flex-direction: column;
   gap: 0.5rem;
   padding: 1rem 0.5rem;
-
-  background: white;
-  color: black;
+  background: light-dark(var(--main-bg-color), var(--dark-bg-color));
+  color: light-dark(var(--dark-bg-color), var(--main-bg-color));
 }
 
 button {
-  border: 2px solid #323232;
+  border: 2px solid loght-dark(var(--main-border-color), var(--dark-border-color));
   border-radius: 5px;
   font-size: 1rem;
   padding: 0.75rem;
@@ -180,6 +187,13 @@ main {
   h4 {
     margin: 0;
   }
+}
+
+.statSrc {
+  display: flex;
+  align-items: baseline;
+  border: 1px dashed;
+  padding: 0 0.5em;
 }
 
 footer {
@@ -193,7 +207,7 @@ footer {
   gap: 1em;
 
   .stat {
-    border: 1px solid black;
+    border: 1px solid light-dark(var(--dark-bg-color), var(--main-bg-color));
     border-radius: 1em;
     min-width: 5rem;
     align-content: center;
@@ -205,8 +219,8 @@ footer {
     overflow: auto;
 
     strong {
-      background-color: black;
-      color: white;
+      background-color: light-dark(var(--dark-bg-color), var(--main-bg-color));
+      color: light-dark(var(--main-bg-color), var(--dark-bg-color));
       margin-bottom: 5px;
       padding: 5px 0;
     }
@@ -234,15 +248,15 @@ table {
 .features,
 .equipment,
 .spells {
-  border: 1px solid black;
+  border: 1px solid light-dark(var(--dark-bg-color), var(--main-bg-color));
 
   table {
     margin: 0 auto;
   }
 
   h4 {
-    background-color: black;
-    color: white;
+    background-color: light-dark(var(--dark-bg-color), var(--main-bg-color));
+    color: light-dark(var(--main-bg-color), var(--dark-bg-color));
     text-align: center;
   }
 
@@ -333,5 +347,21 @@ table {
   header {
     width: 100%;
     width: -webkit-fill-available;
+  }
+}
+
+/*  dark mode tweaks */
+@media (prefers-color-scheme: dark) {
+  .gridPaper {
+    background-color: #000002;
+    background-image: 
+      linear-gradient(#444 2px, transparent 2px),
+      linear-gradient(90deg, #444 2px, transparent 2px),
+      linear-gradient(rgba(192, 192, 224, 0.2) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(192, 192, 224, 0.2) 1px, transparent 1px);
+  }
+
+  header img {
+    filter: invert(1);
   }
 }

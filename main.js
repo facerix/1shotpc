@@ -485,9 +485,9 @@ const MODS_BY_CLASS = {
       `Slow: If you hit a creature with your Longbow and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn.`
     ],
     spells: [
-      "Cure Wounds",
-      "Hail of Thorns",
-      "Hunter’s Mark",
+      "Cure Wounds (lvl 1)",
+      "Hail of Thorns (lvl 1)",
+      "Hunter’s Mark (2 / day)",
     ],
   },
   Rogue: {
@@ -1628,11 +1628,11 @@ const PC_by_StatArray = (classOverride) => {
   };
 };
 
-const newPC = ({ classOverride = "", speciesOverride="", oldSchool = false }) => {
+const newPC = ({ classOverride = "", speciesOverride="", randomStats = false }) => {
   const species = speciesOverride || oneOf(BASE_SPECIES);
   const name = `${oneOf(FIRST_NAMES_BY_SPECIES[species])} ${oneOf(LAST_NAMES_BY_SPECIES[species])}`.trim();
 
-  const core = oldSchool ? PC_by_4d6() : PC_by_StatArray(classOverride);
+  const core = randomStats ? PC_by_4d6() : PC_by_StatArray(classOverride);
   const className = classOverride || core.className;
   const attrs = core.attrs;
 
@@ -1862,12 +1862,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const main = document.querySelector("main");
   let speciesOverride = "";
   let classOverride = "";
+  let randomStats = false;  // stat array vs 4d6-dl
 
   const saved = localStorage.getItem("savedPC");
   let pcData = saved ? JSON.parse(saved) : newPC({ classOverride });
 
   const regen = () => {
-    pcData = newPC({ classOverride, speciesOverride });
+    pcData = newPC({ classOverride, speciesOverride, randomStats });
     main.innerHTML = CharacterSheet(pcData);
   }
 
@@ -1886,6 +1887,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   classSelector.addEventListener("change", evt => {
     classOverride = evt.target.value;
+    regen();
+  })
+
+  document.querySelector("div.statSrc").addEventListener("change", evt => {
+    randomStats = (evt.target.value === "random");
     regen();
   })
 

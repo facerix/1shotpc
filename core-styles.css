@@ -194,6 +194,11 @@ main {
   align-items: baseline;
   border: 1px dashed;
   padding: 0 0.5em;
+  border-radius: 2px;
+}
+
+details summary {
+  cursor: pointer;
 }
 
 footer {
@@ -265,10 +270,7 @@ table {
 
     details {
       margin-left: -1rem;
-
-      div {
-        margin-bottom: 0.5rem;
-      }
+      margin-bottom: 0.5rem;
     }
   }
 }

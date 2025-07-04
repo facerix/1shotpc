@@ -189,7 +189,7 @@ main {
   }
 }
 
-.statSrc {
+.radio-group {
   display: flex;
   align-items: baseline;
   border: 1px dashed;
@@ -263,6 +263,10 @@ table {
     background-color: light-dark(var(--dark-bg-color), var(--main-bg-color));
     color: light-dark(var(--main-bg-color), var(--dark-bg-color));
     text-align: center;
+  }
+
+  h5 {
+    margin: 0.75rem 1rem -0.5rem
   }
 
   ul {

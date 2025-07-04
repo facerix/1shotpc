@@ -60,12 +60,19 @@
       <option value="Warlock">Warlock</option>
       <option value="Wizard">Wizard</option>
     </select>
-    <div class="statSrc">
+    <div class="statSrc radio-group">
       <span>Stats:</span>
       <input type="radio" id="array" name="statMethod" value="array" checked />
       <label for="array">Fixed</label>
       <input type="radio" id="random" name="statMethod" value="random" />
       <label for="random">Random</label>
+    </div>
+    <div class="spellChoice radio-group">
+      <span>Spells:</span>
+      <input type="radio" id="fixedSpells" name="spellChoice" value="fixed" checked />
+      <label for="fixedSpells">Fixed</label>
+      <input type="radio" id="rndSpells" name="spellChoice" value="random" />
+      <label for="rndSpells">Random</label>
     </div>
   </header>
   <main>

@@ -1,4 +1,5 @@
 import { jsx } from "./src/domUtils.js";
+import { SPELLS_BY_CLASS, SPELL_TEXT_BY_NAME } from './srd_spells.js';
 
 const RE_SPELL_LEVEL = /.* \(lvl (\d+)\)/;
 
@@ -20,6 +21,11 @@ const pickNMore = (array, n, existingSet) => {
   } while (existingSet.size < targetSize);
   return existingSet;
 };
+
+const pickNOf = (array, n) => {
+  const set = new Set();
+  return pickNMore(array, n, set);
+}
 
 const BASE_CLASSES = [
   "Barbarian",
@@ -368,13 +374,23 @@ const MODS_BY_CLASS = {
         <p>You can confer a Bardic Inspiration die a number of times equal to your Charisma modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.</p>`,
       `Spellcasting: You have 2 level-1 spell slots that recharge on a long rest. You can cast your cantrips (level 0 spells) as often as you want. Charisma is your spellcasting ability for your Bard spells.`
     ],
+    spellCounts: {
+      cantrips: 2,
+      lvl1: 4
+    },
     spells: [
-      "Dancing Lights (lvl 0)",
-      "Vicious Mockery (lvl 0)",
-      "Charm Person (lvl 1)",
-      "Color Spray (lvl 1)",
-      "Dissonant Whispers (lvl 1)",
-      "Healing Word (lvl 1)"
+      // cantrips
+      [
+        "Dancing Lights",
+        "Vicious Mockery",
+      ],
+      // level 1
+      [
+        "Charm Person",
+        "Color Spray",
+        "Dissonant Whispers",
+        "Healing Word"
+      ]
     ]
   },
   Cleric: {
@@ -387,15 +403,25 @@ const MODS_BY_CLASS = {
     features: [
       "Spellcasting: You have 2 level-1 spell slots that recharge on a long rest. You can cast your cantrips (level 0 spells) as often as you want. Wisdom is your spellcasting ability for your Cleric spells.",
     ],
+    spellCounts: {
+      cantrips: 4,
+      lvl1: 4
+    },
     spells: [
-      "Guidance (lvl 0)",
-      "Light (lvl 0)",
-      "Sacred Flame (lvl 0)",
-      "Thaumaturgy (lvl 0)",
-      "Bless (lvl 1)",
-      "Cure Wounds (lvl 1)",
-      "Guiding Bolt (lvl 1)",
-      "Shield of Faith (lvl 1)",
+      // cantrips
+      [
+        "Guidance",
+        "Light",
+        "Sacred Flame",
+        "Thaumaturgy",
+      ],
+      // level 1
+      [
+        "Bless",
+        "Cure Wounds",
+        "Guiding Bolt",
+        "Shield of Faith",
+      ]
     ]
   },
   Druid: {
@@ -409,14 +435,24 @@ const MODS_BY_CLASS = {
       "Spellcasting: You have 2 level-1 spell slots that recharge on a long rest. You can cast your cantrips (level 0 spells) as often as you want. Wisdom is your spellcasting ability for your Druid spells.",
       "Druidic: You know Druidic, the secret language of Druids. You can use Druidic to leave hidden messages. You and others who know Druidic automatically spot such a message.",
     ],
+    spellCounts: {
+      cantrips: 2,
+      lvl1: 5
+    },
     spells: [
-      "Druidcraft (lvl 0)",
-      "Produce Flame (lvl 0)",
-      "Animal Friendship (lvl 1)",
-      "Speak with Animals (lvl 1)",
-      "Cure Wounds (lvl 1)",
-      "Faerie Fire (lvl 1)",
-      "Thunderwave (lvl 1)",
+      // cantrips
+      [
+        "Druidcraft",
+        "Produce Flame",
+      ],
+      // level 1
+      [
+        "Animal Friendship",
+        "Speak with Animals",
+        "Cure Wounds",
+        "Faerie Fire",
+        "Thunderwave",
+      ]
     ]
   },
   Fighter: {
@@ -464,9 +500,18 @@ const MODS_BY_CLASS = {
       `Sap: If you hit a creature with your Longsword, that creature has Disadvantage on its next attack roll before the start of your next turn.`,
       `Slow: If you hit a creature with your Javelin and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn. If the creature is hit more than once by weapons that have this property, the Speed reduction doesn’t exceed 10 feet.`,
     ],
+    spellCounts: {
+      cantrips: 0,
+      lvl1: 2
+    },
     spells: [
-      "Heroism (lvl 1)",
-      "Divine Smite (lvl 1)"
+      // no cantrips
+      [],
+      // level 1
+      [
+        "Heroism",
+        "Divine Smite"
+      ]
     ]
   },
   Ranger: {
@@ -482,10 +527,22 @@ const MODS_BY_CLASS = {
       `Nick: You can make a bonus attack with your Scimitar as part of the same Attack action as your Shortsword.`,
       `Slow: If you hit a creature with your Longbow and deal damage to it, you can reduce its Speed by 10 feet until the start of your next turn.`
     ],
+    spellCounts: {
+      cantrips: 0,
+      lvl1: 2
+    },
     spells: [
-      "Cure Wounds (lvl 1)",
-      "Ensnaring Strike (lvl 1)",
-      "Hunter’s Mark (2 / day)",
+      // no cantrips
+      [],
+      // level 1
+      [
+        "Cure Wounds",
+        "Ensnaring Strike",
+      ],
+      // innate (core class feature)
+      [
+        ["Hunter’s Mark", 2],
+      ]
     ],
   },
   Rogue: {
@@ -516,13 +573,23 @@ const MODS_BY_CLASS = {
         <p>You have Advantage on the attack rolls of Sorcerer spells you cast.</p>
         <p>You can use this feature twice, and you regain all expended uses of it when you finish a Long Rest.</p>`
     ],
+    spellCounts: {
+      cantrips: 4,
+      lvl1: 2
+    },
     spells: [
-      "Light (lvl 0)",
-      "Prestidigitation (lvl 0)",
-      "Shocking Grasp (lvl 0)",
-      "Sorcerous Burst (lvl 0)",
-      "Burning Hands (lvl 1)",
-      "Feather Fall (lvl 1)",
+      // cantrips
+      [
+        "Light",
+        "Prestidigitation",
+        "Shocking Grasp",
+        "Sorcerous Burst",
+      ],
+      // level 1
+      [
+        "Burning Hands",
+        "Feather Fall",
+      ]
     ]
   },
   Warlock: {
@@ -535,11 +602,21 @@ const MODS_BY_CLASS = {
     features: [
       "Pact Magic: You have 1 level-1 spell slot that recharges on a short rest. You can cast your cantrips (level 0 spells) as often as you want. Charisma is your spellcasting ability for your Warlock spells.",
     ],
+    spellCounts: {
+      cantrips: 2,
+      lvl1: 2
+    },
     spells: [
-      "Eldritch Blast (lvl 0)",
-      "Prestidigitation (lvl 0)",
-      "Hex (lvl 1)",
-      "Hideous Laughter (lvl 1)",
+      // cantrips
+      [
+        "Eldritch Blast",
+        "Prestidigitation",
+      ],
+      // level 1
+      [
+        "Hex",
+        "Hideous Laughter",
+      ]
     ]
   },
   Wizard: {
@@ -554,123 +631,42 @@ const MODS_BY_CLASS = {
       `Arcane Recovery: You can regain some of your magical energy by studying your spellbook. When you finish a Short Rest, you can choose to recover one 1st-level spell slot.      
         <p>Once you use this feature, you can’t do so again until you finish a Long Rest.</p>`
     ],
+    spellCounts: {
+      cantrips: 3,
+      lvl1: 4,
+      lvl1_spellBook: 6 // might not care about this for the purposes of a 1-shot
+    },
     spells: [
-      "Light (lvl 0)",
-      "Mage Hand (lvl 0)",
-      "Ray of Frost (lvl 0)",
-      "Detect Magic (lvl 1)",
-      "Feather Fall (lvl 1)",
-      "Mage Armor (lvl 1)",
-      "Magic Missile (lvl 1)",
-      "Sleep (lvl 1)",
-      "Thunderwave (lvl 1)",
+      // cantrips
+      [
+        "Light",
+        "Mage Hand",
+        "Ray of Frost",
+      ],
+      // level 1
+      [
+        "Detect Magic",
+        "Feather Fall",
+        "Mage Armor",
+        "Magic Missile",
+      ]
     ]
   },
 };
 
-const SPELL_TEXT_BY_NAME = {
-  "Animal Friendship (lvl 1)": "Target a Beast that you can see within range. The target must succeed on a Wisdom saving throw or have the Charmed condition for the duration. If you or one of your allies deals damage to the target, the spell ends.",
-  "Bless (lvl 1)": "You bless up to three creatures within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target adds 1d4 to the attack roll or save.",
-  "Burning Hands (lvl 1)": `A thin sheet of flames shoots forth from you. Each creature in a 15-foot Cone makes a Dexterity saving throw, taking 3d6 Fire damage on a failed save or half as much damage on a successful one.<br><br>
-    Flammable objects in the Cone that aren’t being worn or carried start burning.`,
-  "Charm Person (lvl 1)": `One Humanoid you can see within range makes a Wisdom saving throw. It does so with Advantage if you or your allies are fighting it. On a failed save, the target has the Charmed condition until the spell ends or until you or your allies damage it. The Charmed creature is Friendly to you. When the spell ends, the target knows it was Charmed by you.`,
-  "Chill Touch (lvl 0)": `Channeling the chill of the grave, make a melee spell attack against a target within reach. On a hit, the target takes 1d10 Necrotic damage, and it can’t regain Hit Points until the end of your next turn.`,
-  "Color Spray (lvl 1)": "You launch a dazzling array of flashing, colorful light. Each creature in a 15-foot Cone originating from you must succeed on a Constitution saving throw or have the Blinded condition until the end of your next turn.",
-  "Cure Wounds (lvl 1)": "A creature you touch regains a number of Hit Points equal to 2d8 plus your spellcasting ability modifier.",
-  "Dancing Lights (lvl 0)": `You create up to four torch-size lights within range, making them appear as torches, lanterns, or glow- ing orbs that hover for the duration. Alternatively, you combine the four lights into one glowing Me- dium form that is vaguely humanlike. Whichever form you choose, each light sheds Dim Light in a 10- foot radius. object. Covering that object with something opaque, such as a bowl or helm, blocks the sunlight.<br><br>
-    As a Bonus Action, you can move the lights up to 60 feet to a space within range. A light must be within 20 feet of another light created by this spell, and a light vanishes if it exceeds the spell’s range.`,
-  "Detect Magic (lvl 1)": `For the duration, you sense the presence of magical effects within 30 feet of yourself. If you sense such effects, you can take the Magic action to see a faint aura around any visible creature or object in the area that bears the magic, and if an effect was created by a spell, you learn the spell’s school of magic.<br><br>
-    The spell is blocked by 1 foot of stone, dirt, or wood; 1 inch of metal; or a thin sheet of lead.`,
-  "Disguise Self (lvl 1)": `You make yourself—including your clothing, armor, weapons, and other belongings on your person—look different until the spell ends. You can seem 1 foot shorter or taller and can appear heavier or lighter. You must adopt a form that has the same basic arrangement of limbs as you have. Otherwise, the extent of the illusion is up to you.<br><br>
-    The changes wrought by this spell fail to hold up to physical inspection. For example, if you use this spell to add a hat to your outfit, objects pass through the hat, and anyone who touches it would feel nothing.<br><br>
-    To discern that you are disguised, a creature must take the Study action to inspect your appearance and succeed on an Intelligence (Investigation) check against your spell save DC.`,
-  "Dissonant Whispers (lvl 1)": "One creature of your choice that you can see within range hears a discordant melody in its mind. The target makes a Wisdom saving throw. On a failed save, it takes 3d6 Psychic damage and must immediately use its Reaction, if available, to move as far away from you as it can, using the safest route. On a successful save, the target takes half as much damage only.",
-  "Divine Smite (lvl 1)": "The target takes an extra 2d8 Radiant damage from the attack. The damage increases by 1d8 if the target is a Fiend or an Undead.",
-  "Druidcraft (lvl 0)": `Whispering to the spirits of nature, you create one of the following effects within range.<br><br>
-    <b>Weather Sensor</b>. You create a Tiny, harmless sensory effect that predicts what the weather will be at your location for the next 24 hours. The effect might manifest as a golden orb for clear skies, a cloud for rain, falling snowflakes for snow, and so on. This effect persists for 1 round.<br><br>
-    <b>Bloom</b>. You instantly make a flower blossom, a seed pod open, or a leaf bud bloom.<br><br>
-    <b>Sensory Effect</b>. You create a harmless sensory effect, such as falling leaves, spectral dancing fairies, a gentle breeze, the sound of an animal, or the faint odor of skunk. The effect must fit in a 5-foot Cube.<br><br>
-    <b>Fire Play</b>. You light or snuff out a candle, a torch, or a campfire.`,
-  "Eldritch Blast (lvl 0)": "You hurl a beam of crackling energy. Make a ranged spell attack against one creature or object in range. On a hit, the target takes 1d10 Force damage.",
-  "Ensnaring Strike (lvl 1)": `As you hit the target, grasping vines appear on it, and it makes a Strength saving throw. A Large or larger creature has Advantage on this save. On a failed save, the target has the Restrained condition until the spell ends. On a successful save, the vines shrivel away, and the spell ends.<br><br>
-    While Restrained, the target takes 1d6 Piercing damage at the start of each of its turns. The target or a creature within reach of it can take an action to make a Strength (Athletics) check against your spell save DC. On a success, the spell ends.`,
-  "Faerie Fire (lvl 1)": `Objects in a 20-foot Cube within range are outlined in blue, green, or violet light (your choice). Each creature in the Cube is also outlined if it fails a Dexterity saving throw. For the duration, objects and affected creatures shed Dim Light in a 10-foot radius and can’t benefit from the Invisible condition.<br><br>
-    Attack rolls against an affected creature or object have Advantage if the attacker can see it.`,
-  "Feather Fall (lvl 1)": "Choose up to five falling creatures within range. A falling creature’s rate of descent slows to 60 feet per round until the spell ends. If a creature lands before the spell ends, the creature takes no damage from the fall, and the spell ends for that creature.",
-  "Fire Bolt (lvl 0)": "You hurl a mote of fire at a creature or an object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 Fire damage. A flammable object hit by this spell starts burning if it isn’t being worn or carried.",
-  "Friends (lvl 0)": `You magically emanate a sense of friendship toward one creature you can see within range. The target must succeed on a Wisdom saving throw or have the Charmed condition for the duration. The target succeeds automatically if it isn’t a Humanoid, if you’re fighting it, or if you have cast this spell on it within the past 24 hours.<br><br>
-    The spell ends early if the target takes damage or if you make an attack roll, deal damage, or force anyone to make a saving throw. When the spell ends, the target knows it was Charmed by you.`,
-  "Guidance (lvl 0)": "You touch a willing creature and choose a skill. Until the spell ends, the creature adds 1d4 to any ability check using the chosen skill.",
-  "Guiding Bolt (lvl 1)": "You hurl a bolt of light toward a creature within range. Make a ranged spell attack against the target. On a hit, it takes 4d6 Radiant damage, and the next attack roll made against it before the end of your next turn has Advantage.",
-  "Healing Word (lvl 1)": "A creature of your choice that you can see within range regains Hit Points equal to 2d4 plus your spellcasting ability modifier.",
-  "Heroism (lvl 1)": "A willing creature you touch is imbued with bravery. Until the spell ends, the creature is immune to the Frightened condition and gains Temporary Hit Points equal to your spellcasting ability modifier at the start of each of its turns.",
-  "Hex (lvl 1)": `You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 Necrotic damage to the target whenever you hit it with an attack roll. Also, choose one ability when you cast the spell. The target has Disadvantage on ability checks made with the chosen ability.`,
-  "Hideous Laughter (lvl 1)": `One creature of your choice that you can see within range makes a Wisdom saving throw. On a failed save, it has the Prone and Incapacitated conditions for the duration. During that time, it laughs uncontrollably if it’s capable of laughter, and it can’t end the Prone condition on itself.<br><br>
-    At the end of each of its turns and each time it takes damage, it makes another Wisdom saving throw. The target has Advantage on the save if the save is triggered by damage. On a successful save, the spell ends.`,
-  "Hunter’s Mark (2 / day)": "You magically mark one creature you can see within range as your quarry. Until the spell ends, you deal an extra 1d6 Force damage to the target whenever you hit it with an attack roll.",
-  "Light (lvl 0)": `You touch one Large or smaller object that isn’t being worn or carried by someone else. Until the spell ends, the object sheds Bright Light in a 20-foot radius and Dim Light for an additional 20 feet. The light can be colored as you like.<br><br>
-    Covering the object with something opaque blocks the light. The spell ends if you cast it again.`,
-  "Longstrider (lvl 1)": "You touch a creature. The target’s Speed increases by 10 feet until the spell ends.",
-  "Mage Armor (lvl 1)": "You touch a willing creature who isn’t wearing armor. Until the spell ends, the target’s base AC becomes 13 plus its Dexterity modifier. The spell ends early if the target dons armor.",
-  "Mage Hand (lvl 0)": `A spectral, floating hand appears at a point you choose within range. The hand lasts for the duration. The hand vanishes if it is ever more than 30 feet away from you or if you cast this spell again.<br><br>
-    When you cast the spell, you can use the hand to manipulate an object, open an unlocked door or container, stow or retrieve an item from an open container, or pour the contents out of a vial.<br><br>
-    As a Magic action on your later turns, you can control the hand thus again. As part of that action, you can move the hand up to 30 feet.<br><br>  
-    The hand can’t attack, activate magic items, or carry more than 10 pounds.`,
-  "Magic Missile (lvl 1)": "ou create three glowing darts of magical force. Each dart strikes a creature of your choice that you can see within range. A dart deals 1d4 + 1 Force damage to its target. The darts all strike simultaneously, and you can direct them to hit one creature or several.",
-  "Mending (lvl 0)": `This spell repairs a single break or tear in an object you touch, such as a broken chain link, two halves of a broken key, a torn cloak, or a leaking wineskin. As long as the break or tear is no larger than 1 foot in any dimension, you mend it, leaving no trace of the former damage.<br><br>
-    This spell can physically repair a magic item, but it can’t restore magic to such an object.`,
-  "Message (lvl 0)": `You point toward a creature within range and whisper a message. The target (and only the target) hears the message and can reply in a whisper that only you can hear.<br><br>
-    You can cast this spell through solid objects if you are familiar with the target and know it is beyond the barrier. Magical silence; 1 foot of stone, metal, or wood; or a thin sheet of lead blocks the spell.`,
-  "Minor Illusion (lvl 0)": `You create a sound or an image of an object within range that lasts for the duration. See the descriptions below for the effects of each. The illusion ends if you cast this spell again.<br><br>
-    If a creature takes a Study action to examine the sound or image, the creature can determine that it is an illusion with a successful Intelligence (Investigation) check against your spell save DC. If a creature discerns the illusion for what it is, the illusion becomes faint to the creature.<br><br>
-    <b>Sound</b>. If you create a sound, its volume can range from a whisper to a scream. It can be your voice, someone else’s voice, a lion’s roar, a beating of drums, or any other sound you choose. The sound continues unabated throughout the duration, or you can make discrete sounds at different times before the spell ends.<br><br>
-    <b>Image</b>. If you create an image of an object—such as a chair, muddy footprints, or a small chest—it must be no larger than a 5-foot Cube. The image can’t create sound, light, smell, or any other sensory effect. Physical interaction with the image reveals it to be an illusion, since things can pass through it.`,
-  "Poison Spray (lvl 0)": "You spray toxic mist at a creature within range. Make a ranged spell attack against the target. On a hit, the target takes 1d12 Poison damage.",
-  "Prestidigitation (lvl 0)": `You create a magical effect within range. Choose the effect from the options below. If you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time.<br><br>
-    <b>Sensory Effect</b>. You create an instantaneous, harmless sensory effect, such as a shower of sparks, a puff of wind, faint musical notes, or an odd odor.<br>
-    <b>Fire Play</b>. You instantaneously light or snuff out a candle, a torch, or a small campfire.<br>
-    <b>Clean or Soil</b>. You instantaneously clean or soil an object no larger than 1 cubic foot.<br>
-    <b>Minor Sensation</b>. You chill, warm, or flavor up to 1 cubic foot of nonliving material for 1 hour.<br>
-    <b>Magic Mark</b>. You make a color, a small mark, or a symbol appear on an object or a surface for 1 hour.<br>
-    <b>Minor Creation</b>. You create a nonmagical trinket or an illusory image that can fit in your hand. It lasts until the end of your next turn. A trinket can deal no damage and has no monetary worth.`,
-  "Produce Flame (lvl 0)": `A flickering flame appears in your hand and remains there for the duration. While there, the flame emits no heat and ignites nothing, and it sheds Bright Light in a 20-foot radius and Dim Light for an additional 20 feet. The spell ends if you cast it again.<br><br>
-    Until the spell ends, you can take a Magic action to hurl fire at a creature or an object within 60 feet of you. Make a ranged spell attack. On a hit, the target takes 1d8 Fire damage.`,
-  "Ray of Frost (lvl 0)": "A frigid beam of blue-white light streaks toward a creature within range. Make a ranged spell attack against the target. On a hit, it takes 1d8 Cold damage, and its Speed is reduced by 10 feet until the start of your next turn.",
-  "Resistance (lvl 0)": "You touch a willing creature and choose a damage type: Acid, Bludgeoning, Cold, Fire, Lightning, Necrotic, Piercing, Poison, Radiant, Slashing, or Thunder. When the creature takes damage of the chosen type before the spell ends, the creature reduces the total damage taken by 1d4. A creature can benefit from this spell only once per turn.",
-  "Sacred Flame (lvl 0)": "Flame-like radiance descends on a creature that you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 Radiant damage. The target gains no benefit from Half Cover or Three-Quarters Cover for this save.",
-  "Shield of Faith (lvl 1)": "A shimmering field surrounds a creature of your choice within range, granting it a +2 bonus to AC for the duration.",
-  "Shocking Grasp (lvl 0)": "Lightning springs from you to a creature that you try to touch. Make a melee spell attack against the target. On a hit, the target takes 1d8 Lightning damage, and it can’t make Opportunity Attacks until the start of its next turn.",
-  "Sleep (lvl 1)": `Each creature of your choice in a 5-foot-radius Sphere centered on a point within range must succeed on a Wisdom saving throw or have the Incapacitated condition until the end of its next turn, at which point it must repeat the save. If the target fails the second save, the target has the Unconscious condition for the duration. The spell ends on a target if it takes damage or someone within 5 feet of it takes an action to shake it out of the spell’s effect.<br><br>
-    Creatures that don’t sleep, such as elves, or that have Immunity to the Exhaustion condition automatically succeed on saves against this spell.`,
-  "Sorcerous Burst (lvl 0)": `You cast sorcerous energy at one creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d8 damage of a type you choose: Acid, Cold, Fire, Lightning, Poison, Psychic, or Thunder.<br><br>
-    If you roll an 8 on a d8 for this spell, you can roll another d8, and add it to the damage. When you cast this spell, the maximum number of these d8s you can add to the spell’s damage equals your spellcasting ability modifier.`,
-  "Speak with Animals (lvl 1)": `For the duration, you can comprehend and verbally communicate with Beasts, and you can use any of the Influence action’s skill options with them.<br><br>
-    Most Beasts have little to say about topics that don’t pertain to survival or companionship, but at minimum, a Beast can give you information about nearby locations and monsters, including whatever it has perceived within the past day.`,
-  "Thaumaturgy (lvl 0)": `You manifest a minor wonder within range. You create one of the effects below within range. If you cast this spell multiple times, you can have up to three of its 1-minute effects active at a time.<br><br>
-    <b>Altered Eyes</b>. You alter the appearance of your eyes for 1 minute.<br><br>
-    <b>Booming Voice</b>. Your voice booms up to three times as loud as normal for 1 minute. For the duration, you have Advantage on Charisma (Intimidation) checks.<br><br>
-    <b>Fire Play</b>. You cause flames to flicker, brighten, dim, or change color for 1 minute.<br><br>
-    <b>Invisible Hand</b>. You instantaneously cause an unlocked door or window to fly open or slam shut.<br><br>
-    <b>Phantom Sound</b>. You create an instantaneous sound that originates from a point of your choice within range, such as a rumble of thunder, the cry of a raven, or ominous whispers.<br><br>
-    <b>Tremors</b>. You cause harmless tremors in the ground for 1 minute.`,
-  "Thunderwave (lvl 1)": `You unleash a wave of thunderous energy. Each creature in a 15-foot Cube originating from you makes a Constitution saving throw. On a failed save, a creature takes 2d8 Thunder damage and is pushed 10 feet away from you. On a successful save, a creature takes half as much damage only.<br><br>
-    In addition, unsecured objects that are entirely within the Cube are pushed 10 feet away from you, and a thunderous boom is audible within 300 feet.`,
-  "Vicious Mockery (lvl 0)": `You unleash a string of insults laced with subtle enchantments at one creature you can see or hear within range. The target must succeed on a Wisdom saving throw or take 1d6 Psychic damage and have Disadvantage on the next attack roll it makes before the end of its next turn.`,
-};
-
 const ATTACKS_BY_CLASS = {
   Barbarian: ["Greataxe", "Handaxe", "Rage"],
-  Bard: ["Dagger", "Vicious Mockery", "Color Spray", "Dissonant Whispers"],
-  Cleric: ["Mace", "Sacred Flame", "Guiding Bolt"],
-  Druid: ["Sickle", "Quarterstaff", "Thunderwave"],
+  Bard: ["Dagger"],
+  Cleric: ["Mace"],
+  Druid: ["Sickle", "Quarterstaff"],
   Fighter: ["Greatsword", "Flail", "Javelin"],
   Monk: ["Spear", "Dagger", "Unarmed Strike"],
-  Paladin: ["Longsword", "Javelin", "Divine Smite"],
-  Ranger: ["Scimitar", "Shortsword", "Longbow", "Ensnaring Strike", "Hunter’s Mark"],
+  Paladin: ["Longsword", "Javelin"],
+  Ranger: ["Scimitar", "Shortsword", "Longbow"],
   Rogue: ["Dagger", "Shortsword", "Shortbow", "Sneak Attack"],
-  Sorcerer: ["Spear", "Dagger", "Shocking Grasp", "Sorcerous Burst", "Burning Hands"],
-  Warlock: ["Sickle", "Dagger", "Eldritch Blast", "Hex", "Hideous Laughter"],
-  Wizard: ["Dagger", "Ray of Frost", "Magic Missile", "Sleep"],
+  Sorcerer: ["Spear", "Dagger"],
+  Warlock: ["Sickle", "Dagger"],
+  Wizard: ["Dagger"],
 };
 
 const ATTACKS = {
@@ -759,13 +755,28 @@ const ATTACKS = {
   },
   "Sneak Attack": {
     desc: "1d6 to first attack roll of the round that has advantage and hits."
-  },
+  }
+};
 
-  // Bard spell attacks
-  "Vicious Mockery": {
-    save: "WIS",
+const SPELL_ATTACKS = {
+  "Acid Splash": {
+    save: "DEX",
     damage: "1d6",
-    damageType: "Psychic"
+    damageType: "Acid"
+  },
+  "Burning Hands": {
+    save: "DEX",
+    damage: "3d6",
+    damageType: "Fire"
+  },
+  "Chill Touch": {
+    damage: "1d10",
+    damageType: "Necrotic, target can’t regain Hit Points until the end of your next turn.",
+  },
+  "Chromatic Orb": {
+    save: "CHA",
+    damage: "3d8",
+    damageType: "[Choose: Acid, Cold, Fire, Lightning, Poison, or Thunder]",
   },
   "Color Spray": {
     save: "CON",
@@ -778,64 +789,33 @@ const ATTACKS = {
     damageType: "Psychic",
     notes: `Target must immediately use its Reaction, if available, to move as far away from you as it can, using the safest route.`
   },
-
-  // Cleric spell attacks
-  "Sacred Flame": {
-    save: "DEX",
-    damage: "1d8",
-    damageType: "Radiant"
-  },
-  "Guiding Bolt": {
-    attr: "WIS",
-    damage: "4d6",
-    damageType: "Radiant"
-  },
-
-  // Druid spell attacks
-  "Thunderwave": {
-    save: "CON",
-    damage: "2d8",
-    damageType: "Thunder"
-  },
-
-  // Paladin spell attacks
   "Divine Smite": {
     desc: `As a bonus action, you can spend a spell slot to add 2d8 Radiant damage to a successful weapon attack.<br>The damage increases by 1d8 if the target is a Fiend or an Undead.`,
   },
-
-  // Ranger spell attacks
+  "Eldritch Blast": {
+    damage: "1d10",
+    damageType: "Force"
+  },
   "Ensnaring Strike": {
     save: "STR",
     damage: "1d6",
     damageType: "Piercing",
     notes: "Cast this spell as a bonus action after hitting a target with your Longbow, to attempt to restrain it."
   },
-  "Hunter’s Mark": {
-    desc: `You magically mark one creature you can see within range as your quarry. Until the spell ends, you deal an extra 1d6 Force damage to the target whenever you hit it with an attack roll.`
-  },
-
-  // Sorcerer spell attacks
-  "Shocking Grasp": {
-    attr: "CHA",
-    damage: "1d8",
-    damageType: "Lightning, target can't make opportunity attacks until its next turn",
-  },
-  "Sorcerous Burst": {
-    attr: "CHA",
-    damage: "1d8",
-    damageType: "[Choose: Acid, Cold, Fire, Lightning, Poison, Psychic, or Thunder]",
-  },
-  "Burning Hands": {
-    save: "DEX",
-    damage: "3d6",
-    damageType: "Fire"
-  },
-
-  // Warlock spell attacks
-  "Eldritch Blast": {
-    attr: "CHA",
+  "Fire Bolt": {
     damage: "1d10",
-    damageType: "Force"
+    damageType: "Fire",
+    notes: "A flammable object hit by this spell starts burning if it isn’t being worn or carried.",
+  },
+  "Guiding Bolt": {
+    damage: "4d6",
+    damageType: "Radiant"
+  },
+  "Hellish Rebuke": {
+    save: "DEX",
+    damage: "2d10",
+    damageType: "Fire",
+    notes: `When you are attacked, you can cast this as a reaction against your attacker.`,
   },
   "Hex": {
     desc: `You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 Necrotic damage to the target whenever you hit it with an attack roll. Also, choose one ability when you cast the spell. The target has Disadvantage on ability checks made with the chosen ability.`
@@ -846,22 +826,71 @@ const ATTACKS = {
     damageType: "",
     notes: `At the end of each of its turns and each time it takes damage, it makes another Wisdom saving throw. The target has Advantage on the save if the save is triggered by damage. On a successful save, the spell ends.`
   },
-
-  // Wizard spell attacks
-  "Ray of Frost": {
-    attr: "INT",
-    damage: "1d8",
-    damageType: "Cold <br/>(Target's Speed is reduced by 10 feet until your next turn)",
+  "Hunter’s Mark": {
+    desc: `You magically mark one creature you can see within range as your quarry. Until you lose concentration, you deal an extra 1d6 Force damage to the target whenever you hit it with an attack roll.`
+  },
+  "Ice Knife": {
+    damage: "1d10",
+    damageType: "Piercing",
+    notes: `Hit or miss, the shard then explodes. The target and each creature within 5 feet of it must succeed on a Dexterity saving throw or take 2d6 Cold damage.`,
+  },
+  "Inflict Wounds": {
+    save: "CON",
+    damage: "2d10",
+    damageType: "Necrotic",
   },
   "Magic Missile": {
     save: "None",
     damage: "3x 1d4+1",
     damageType: "Force"
   },
+  "Poison Spray": {
+    damage: "1d12",
+    damageType: "Poison",
+  },
+  "Ray of Frost": {
+    damage: "1d8",
+    damageType: "Cold, target's Speed reduced by 10 feet until your next turn",
+  },
+  "Ray of Sickness": {
+    damage: "2d8",
+    damageType: "Poison, target is Poisoned until the end of your next turn."
+  },
+  "Sacred Flame": {
+    save: "DEX",
+    damage: "1d8",
+    damageType: "Radiant"
+  },
+  "Searing Smite": {
+    desc: `As a bonus action, you can spend a spell slot to add 1d4 Fire damage to a successful weapon attack.<br>At the start of each of its turns until the spell ends, the target takes 1d6 Fire damage and then makes a Constitution saving throw. On a failed save, the spell continues. On a successful save, the spell ends.`,
+  },
+  "Shocking Grasp": {
+    damage: "1d8",
+    damageType: "Lightning, target can't make opportunity attacks until its next turn",
+  },
   "Sleep": {
     save: "WIS",
     damage: "Incapacitated until the end of its next turn, at which point it must repeat the save.",
     damageType: ""
+  },
+  "Sorcerous Burst": {
+    damage: "1d8",
+    damageType: "[Choose: Acid, Cold, Fire, Lightning, Poison, Psychic, or Thunder]",
+  },
+  "Starry Wisp": {
+    damage: "1d8",
+    damageType: "Radiant",
+    notes: `Until the end of your next turn, target emits Dim Light in a 10-foot radius and can’t turn Invisible.`,
+  },
+  "Thunderwave": {
+    save: "CON",
+    damage: "2d8",
+    damageType: "Thunder"
+  },
+  "Vicious Mockery": {
+    save: "WIS",
+    damage: "1d6",
+    damageType: "Psychic"
   },
 };
 
@@ -1149,7 +1178,7 @@ const GIANT_BOON_BY_LINEAGE = {
 const getSpeciesMods = (species, bonuses) => {
   let speed = 30;
   let size = "Medium";
-  const spells = [];
+  const spells = [[], [], []];  // cantrips / level 1s / innate (i.e. "N / day")
   const features = [];
   const attacks = [];
   const skills = [];
@@ -1165,7 +1194,7 @@ const getSpeciesMods = (species, bonuses) => {
         "Healing Hands. As a Magic action, you touch a creature and roll 2d4. The creature regains a number of Hit Points equal to the total rolled. Once you use this trait, you can’t use it again until you finish a Long Rest.",
         "Light Bearer. You know the Light cantrip. Charisma is your spellcasting ability for it.",
       ]);
-      spells.push("Light (lvl 0)");
+      spells[0].push("Light");
       break;
 
     case "Dragonborn":
@@ -1204,17 +1233,17 @@ const getSpeciesMods = (species, bonuses) => {
       if (ancestry === "Drow") {
         ancestryAbilities = "The range of your Darkvision increases to 120 feet. You also know the Dancing Lights cantrip.";
         darkvisionRange = 120;
-        spells.push("Dancing Lights (lvl 0)");
+        spells[0].push("Dancing Lights");
 
       } else if (ancestry === "High Elf") {
         ancestryAbilities = "You know the Prestidigitation cantrip.";
-        spells.push("Prestidigitation (lvl 0)");
+        spells[0].push("Prestidigitation");
 
       } else {
         // Wood Elf
         ancestryAbilities = "Your Speed increases to 35 feet. You also know the Druidcraft cantrip.";
         speed = 35;
-        spells.push("Druidcraft (lvl 0)");
+        spells[0].push("Druidcraft");
       }
       const keenSense = oneOf(["Insight", "Perception", "Survival"]);
       skills.push(keenSense);
@@ -1236,14 +1265,12 @@ const getSpeciesMods = (species, bonuses) => {
       ]);
       if (gnomishLineage === "Forest Gnome") {
         features.push(`Gnomish Lineage: Forest Gnome. You know the Minor Illusion cantrip. You also always have the Speak with Animals spell prepared. You can cast it without a spell slot 2 times per day.`);
-        spells.push(...[
-          "Minor Illusion (lvl 0)",
-          "Speak with Animals (lvl 1)"
-        ]);
+        spells[0].push("Minor Illusion");
+        spells[2].push(["Speak with Animals", 2]); // innate
       } else {
-        spells.push(...[
-          "Mending (lvl 0)",
-          "Prestidigitation (lvl 0)"
+        spells[0].push(...[
+          "Mending",
+          "Prestidigitation"
         ]);
         features.push(`Gnomish Lineage: Rock Gnome. You know the Mending and Prestidigitation cantrips. In addition, you can spend 10 minutes casting Prestidigitation to create a Tiny clockwork device (AC 5, 1 HP), such as a toy, fire starter, or music box. When you create the device, you determine its function by choosing one effect from Prestidigitation; the device produces that effect whenever you or another creature takes a Bonus Action to activate it with a touch. If the chosen effect has options within it, you choose one of those options for the device when you create it. For example, if you choose the spell’s ignite-extinguish effect, you determine whether the device ignites or extinguishes fire; the device doesn’t do both. You can have three such devices in existence at a time, and each falls apart 8 hours after its creation or when you dismantle it with a touch as a Utilize action.`);
       }
@@ -1254,7 +1281,7 @@ const getSpeciesMods = (species, bonuses) => {
       const giantAncestry = oneOf(GIANT_LINEAGES);
       features.push(...[
         `Giant Ancestry. You are descended from ${giantAncestry} Giants. You have a supernatural boon from your ancestry, as follows; you can use it 2 times per day:
-      <p>${GIANT_BOON_BY_LINEAGE[giantAncestry]}</p>`,
+        <p>${GIANT_BOON_BY_LINEAGE[giantAncestry]}</p>`,
         "Powerful Build. You have Advantage on any ability check you make to end the Grappled condition. You also count as one size larger when determining your carrying capacity."
       ])
       break;
@@ -1296,7 +1323,7 @@ const getSpeciesMods = (species, bonuses) => {
       if (legacy === "Abyssal") {
         features.push(`Fiendish Legacy. You are the recipient of an Abyssal legacy that grants you supernatural abilities.
           <p>You have Resistance to Poison damage. You also know the Poison Spray cantrip.</p>`);
-        spells.push("Poison Spray (lvl 0)");
+        spells[0].push("Poison Spray");
         attacks.push({
           name: "Poison Spray",
           attr: spellAttr,
@@ -1307,7 +1334,7 @@ const getSpeciesMods = (species, bonuses) => {
       } else if (legacy === "Chthonic") {
         features.push(`Fiendish Legacy. You are the recipient of a Chthonic legacy that grants you supernatural abilities.
           <p>You have Resistance to Necrotic damage. You also know the Chill Touch cantrip.</p>`);
-        spells.push("Chill Touch (lvl 0)");
+        spells[0].push("Chill Touch");
         attacks.push({
           name: "Chill Touch",
           attr: spellAttr,
@@ -1319,7 +1346,7 @@ const getSpeciesMods = (species, bonuses) => {
         // Infernal
         features.push(`Fiendish Legacy. You are the recipient of an Infernal legacy that grants you supernatural abilities.
           <p>You have Resistance to Fire damage. You also know the Fire Bolt cantrip.</p>`);
-        spells.push("Fire Bolt (lvl 0)");
+        spells[0].push("Fire Bolt");
         attacks.push({
           name: "Fire Bolt",
           attr: spellAttr,
@@ -1328,6 +1355,7 @@ const getSpeciesMods = (species, bonuses) => {
         });
       }
       features.push("Otherworldly Presence. You know the Thaumaturgy cantrip.");
+      spells[0].push("Thaumaturgy")
       break;
   }
 
@@ -1578,8 +1606,14 @@ const AttackEntry = (atk, bonuses) => {
       <td>${atk.damage} ${atk.damageType}</td>
     </tr>`;
   } else {
-    const bonus = (atk.damageBonus === false) ? null : bonuses[atk.attr];
-    const dmg = `${atk.damage}${bonus ? statModStr(bonus): ""}`;
+    // const attackAttr = atk.spell ?
+    let bonus = (atk.damageBonus === false) ? null : bonuses[atk.attr];
+    if (atk.spell) {
+      // use bonuses.spellCasting
+      bonus = bonuses.spellCasting;
+    }
+    // const bonus = (atk.damageBonus === false) ? null : bonuses[atk.attr];
+    const dmg = `${atk.damage}${bonus && !atk.spell ? statModStr(bonus): ""}`;
     entry = jsx`<tr>
       <td>${atk.name}</td>
       <td>${statModStr(bonus+2)}</td>
@@ -1595,6 +1629,42 @@ const AttackEntry = (atk, bonuses) => {
 const SpellEntry = (spellName) => {
   const description = SPELL_TEXT_BY_NAME[spellName] ?? "";
   return description ? `<details><summary>${spellName}</summary><div>${description}</div></details>` : jsx`<li>${spellName}</li>`;
+}
+
+const SpellsBlock = (spells, slotCount = 2) => {
+  const cantrips = spells?.[0]?.length ?
+    jsx`<h5>Cantrips</h5>
+      <ul>
+        ${spells[0].map(SpellEntry)}
+      </ul>`
+    : '';
+  const level1s = spells?.[1]?.length ?
+    jsx`<h5>Level 1 (${slotCount} slots)</h5>
+      <ul>
+        ${spells[1].map(SpellEntry)}
+      </ul>`
+    : '';
+  const innate = spells?.[2]?.length ?
+    jsx`<h5>Innate spells</h5>
+      <ul>
+        ${spells[2].map(([name, perDay]) => {
+          const desc = SPELL_TEXT_BY_NAME[name] ?? "";
+          return desc ? `<details><summary>${name} (${perDay}/day)</summary><div>${desc}</div></details>` : `<li>${name}</li>`;
+        })}
+      </ul>`
+    : '';
+  if (cantrips || level1s || innate) {
+    return jsx`
+      <div class="spells">
+        <h4>Spells</h4>
+        ${cantrips}
+        ${level1s}
+        ${innate}
+      </div>
+    `;
+  } else {
+    return '';
+  }
 }
 
 const CharacterSheet = (PC) => {
@@ -1665,14 +1735,7 @@ const CharacterSheet = (PC) => {
         })}
       </ul>
     </div>
-    ${PC.spells?.length > 0 && jsx`
-      <div class="spells">
-        <h4>Spells</h4>
-        <ul>
-          ${PC.spells.map(SpellEntry)}
-        </ul>
-      </div>
-    `}
+    ${SpellsBlock(PC.spells)}
   </div>
   <div class="equipment">
     <h4>Equipment</h4>
@@ -1713,7 +1776,7 @@ const PC_by_StatArray = (classOverride) => {
   };
 };
 
-const newPC = ({ classOverride = "", speciesOverride="", randomStats = false }) => {
+const newPC = ({ classOverride = "", speciesOverride="", randomStats = false, randomSpells = false }) => {
   const species = speciesOverride || oneOf(BASE_SPECIES);
   const name = `${oneOf(FIRST_NAMES_BY_SPECIES[species])} ${oneOf(LAST_NAMES_BY_SPECIES[species])}`.trim();
 
@@ -1735,12 +1798,12 @@ const newPC = ({ classOverride = "", speciesOverride="", randomStats = false }) 
     CHA: abilityModifier(attrs.CHA),
   };
   if (SPELLSAVE_BY_CLASS[className]) {
+    bonuses.spellCasting = bonuses[SPELLSAVE_BY_CLASS[className]];
     bonuses.spellSave = 10 + bonuses[SPELLSAVE_BY_CLASS[className]];
   }
 
   const speciesMods = getSpeciesMods(species, bonuses); // spells / features / attacks / skills
   const classMods = MODS_BY_CLASS[className];
-
 
   const skills = {
     "Athletics": bonuses.STR,
@@ -1782,8 +1845,34 @@ const newPC = ({ classOverride = "", speciesOverride="", randomStats = false }) 
     ...originMods.skills,
     originMods.tool,
   ]);
-  const spells = classMods.spells ? [...classMods.spells] : [];
-  spells.push(...speciesMods.spells);
+  // 3 nested lists: cantrips, 1st-lvl spells, innate (i.e. "per day") spells
+  const spells = [[
+    ...speciesMods.spells[0]
+  ], [
+    ...speciesMods.spells[1]
+  ], [
+    ...speciesMods.spells[2]
+  ]];
+
+  if (randomSpells && SPELLS_BY_CLASS[className]) {
+    let classSpells = SPELLS_BY_CLASS[className].all;
+    if (classMods.spellCounts.cantrips) {
+      if (classSpells?.cantrips?.length) {
+        spells[0].push(...pickNMore(classSpells.cantrips, classMods.spellCounts.cantrips, new Set(spells[0])));
+      }
+    }
+    if (classMods.spellCounts.lvl1) {
+      if (classSpells?.lvl1?.length) {
+        spells[1].push(...pickNMore(classSpells.lvl1, classMods.spellCounts.lvl1, new Set(spells[1])));
+      }
+    }
+  } else if (classMods.spells) {
+    spells[0].push(...classMods.spells[0]);
+    spells[1].push(...classMods.spells[1]);
+  }
+  if (classMods.spells?.[2]) {
+    spells[2].push(...classMods.spells[2]); // may or may not have innate
+  }
 
   // apply any modifications from the origin feat(s)
   [originMods.feat, speciesMods.feat].forEach(feat => {
@@ -1799,35 +1888,20 @@ const newPC = ({ classOverride = "", speciesOverride="", randomStats = false }) 
       case "Magic Initiate (Cleric)":
         // "You gain two cantrips and one level 1 spell from the Cleric spell list.",
         bonuses.spellSave = 10 + bonuses.WIS;
-        spells.unshift(...[
-          "Mending (lvl 0)",
-          "Resistance (lvl 0)",
-        ]);
-        spells.push("Detect Magic (lvl 1)");
+        spells[0] = [...pickNMore(SPELLS_BY_CLASS.Cleric.all.cantrips, 2, new Set(spells[0]))];
+        spells[1] = [...pickNMore(SPELLS_BY_CLASS.Cleric.all.lvl1, 1, new Set(spells[1]))];
         break;
       case "Magic Initiate (Druid)":
         // "You gain two cantrips and one level 1 spell from the Druid spell list.",
         bonuses.spellSave = 10 + bonuses.WIS;
-        spells.unshift(...[
-          "Mending (lvl 0)",
-          "Message (lvl 0)",
-        ])
-        spells.push("Longstrider (lvl 1)");
+        spells[0] = [...pickNMore(SPELLS_BY_CLASS.Druid.all.cantrips, 2, new Set(spells[0]))];
+        spells[1] = [...pickNMore(SPELLS_BY_CLASS.Druid.all.lvl1, 1, new Set(spells[1]))];
         break;
       case "Magic Initiate (Wizard)":
         // "You gain two cantrips and one level 1 spell from the Wizard spell list.",
         bonuses.spellSave = 10 + bonuses.INT;
-        spells.unshift(...[
-          "Friends (lvl 0)",
-          "Fire Bolt (lvl 0)",
-        ])
-        spells.push("Disguise Self (lvl 1)");
-        attacks.push({
-          name: "Fire Bolt",
-          attr: "INT",
-          damage: "1d10",
-          damageType: "Fire"
-        });
+        spells[0] = [...pickNMore(SPELLS_BY_CLASS.Wizard.all.cantrips, 2, new Set(spells[0]))];
+        spells[1] = [...pickNMore(SPELLS_BY_CLASS.Wizard.all.lvl1, 1, new Set(spells[1]))];
         break;
       case "Musician":
         // "You gain proficiency with three musical instruments of your choice."
@@ -1854,6 +1928,17 @@ const newPC = ({ classOverride = "", speciesOverride="", randomStats = false }) 
         break;
     }
   });
+
+  // add spell attacks
+  const spellAttacks = [...spells[0], ...spells[1], ...spells[2]].filter(name => !!SPELL_ATTACKS[name] || !!SPELL_ATTACKS[name[0]]).sort();
+  attacks.push(...spellAttacks.map(spell => {
+    const spellName = Array.isArray(spell) ? spell[0] : spell;
+    return {
+      name: spellName,
+      spell: true,
+      ...SPELL_ATTACKS[spellName]
+    };
+  }));
 
   // Species mods
   if (species === "Dwarf") {
@@ -1910,10 +1995,10 @@ const newPC = ({ classOverride = "", speciesOverride="", randomStats = false }) 
     generateOriginFeat(originMods.feat),
   ];
 
-  // sort spells by name, then by level
-  spells.sort().sort((a, b) => {
-    return a.replace(RE_SPELL_LEVEL, "$1") - b.replace(RE_SPELL_LEVEL, "$1");
-  });
+  // sort spells by name & filter out dupes
+  spells[0] = [...new Set(spells[0])].sort();
+  spells[1] = [...new Set(spells[1])].sort();
+  spells[2] = [...new Set(spells[2])].sort();
 
   const pcData = {
     name,
@@ -1948,12 +2033,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let speciesOverride = "";
   let classOverride = "";
   let randomStats = false;  // stat array vs 4d6-dl
+  let randomSpells = false;  // recommended vs random spell list
 
   const saved = localStorage.getItem("savedPC");
   let pcData = saved ? JSON.parse(saved) : newPC({ classOverride });
 
   const regen = () => {
-    pcData = newPC({ classOverride, speciesOverride, randomStats });
+    pcData = newPC({ classOverride, speciesOverride, randomStats, randomSpells });
     main.innerHTML = CharacterSheet(pcData);
   }
 
@@ -1982,6 +2068,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelector("div.statSrc").addEventListener("change", evt => {
     randomStats = (evt.target.value === "random");
+    regen();
+  })
+
+  document.querySelector("div.spellChoice").addEventListener("change", evt => {
+    randomSpells = (evt.target.value === "random");
     regen();
   })
 

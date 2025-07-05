@@ -120,6 +120,9 @@ header.advanced {
   margin-top: 1rem;
   justify-content: center;
   gap: 1rem;
+  flex-wrap: wrap;
+  height: 0;  /* hide until visible */
+  margin-bottom: 1rem;
 
   transition: all cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s;
 
@@ -131,7 +134,9 @@ header.advanced {
   }
 
   &.visible {
+    height: auto;
     margin-top: 4.25rem;
+    margin-bottom: 0;
   }
 }
 

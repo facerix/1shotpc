@@ -1204,16 +1204,16 @@ const getSpeciesMods = (species, bonuses) => {
       const damageType = DRAGON_BREATH_BY_TYPE[dragonType];
       features.push(...[
         `Draconic Ancestry. Your lineage stems from a ${dragonType} dragon progenitor.`,
-        `Breath Weapon. When you take the Attack action on your turn, you can replace one of your attacks with an exhalation of magical energy in either a 15-foot Cone or a 30-foot Line that is 5 feet wide (choose the shape each time). Each creature in that area must make a Dexterity saving throw (DC 8 plus your Constitution modifier and Proficiency Bonus). On a failed save, a creature takes 1d10 damage of the type determined by your Draconic Ancestry trait. On a successful save, a creature takes half as much damage. You can use this Breath Weapon 2 times per day.`,
+        `Breath Weapon. When you take the Attack action on your turn, you can replace one of your attacks with an exhalation of magical energy in either a 15-foot Cone or a 30-foot Line that is 5 feet wide (choose the shape each time). Each creature in that area must make a Dexterity saving throw (DC 10 plus your Constitution modifier). On a failed save, a creature takes 1d10 damage of the type determined by your Draconic Ancestry trait. On a successful save, a creature takes half as much damage. You can use this Breath Weapon 2 times per day.`,
         `Damage Resistance. You have Resistance to ${damageType} damage.`,
         `Darkvision. You have Darkvision with a range of 60 feet.`
       ]);
       attacks.push({
         name: "Breath Weapon",
-        save: "CON",
+        save: "DEX",
         saveDC: 10 + bonuses.CON,
         damage: "1d10",
-        damageType: "Thunder"    
+        damageType: damageType
       })
       break;
 

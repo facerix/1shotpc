@@ -1736,12 +1736,12 @@ const CharacterSheet = (PC) => {
       </ul>
     </div>
     ${SpellsBlock(PC.spells)}
-  </div>
-  <div class="equipment">
-    <h4>Equipment</h4>
-    <ul>
-      ${PC.equipment.map(eq => `<li>${eq}</li>`)}
-    </ul>
+    <div class="equipment">
+      <h4>Equipment</h4>
+      <ul>
+        ${PC.equipment.map(eq => `<li>${eq}</li>`)}
+      </ul>
+    </div>
   </div>`;
 };
 

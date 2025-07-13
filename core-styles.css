@@ -287,11 +287,8 @@ table {
   columns: 2;
   flex: 1;
 }
-.equipment {
-  columns: 5;
-}
-.spells {
-  flex-basis: 25%;
+.spells, .equipment {
+  flex-basis: 260px;
 }
 #features-and-spells {
   gap: 0.5rem;
@@ -310,9 +307,6 @@ table {
   .spells {
     flex: 1 1 auto;
   }
-  .equipment {
-    columns: 2;
-  }
 
   .stats {
     display: grid;
@@ -324,29 +318,29 @@ table {
 }
 
 @media (min-width: 751px) and (max-width: 900px) {
-  .features {
+  .features, .spells, .equipment {
     flex: 1 1 auto;
-  }
-  .spells {
-    flex: 1 1 auto;
-  }
-}
-
-@media (min-width: 901px) and (max-width: 1200px) {
-  .equipment {
-    columns: 4;
   }
 }
 
 /* print mode */
 @media print {
+  body {
+    font-size: small;
+  }
+
   /* All your print styles go here */
   header.topBar,
   header.advanced,
   footer,
   .topSpacer,
+  details div,
   nav {
     display: none !important;
+  }
+
+  details > summary:first-of-type {
+    list-style: inside disc;
   }
 }
 
